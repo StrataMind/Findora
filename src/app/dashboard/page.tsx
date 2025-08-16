@@ -84,7 +84,11 @@ export default function Dashboard() {
                 <div className="p-4 border border-gray-200 rounded-lg">
                   <h3 className="font-medium text-gray-900">Profile Settings</h3>
                   <p className="text-sm text-gray-500 mt-1">Update your personal information</p>
-                  <Button className="mt-3 w-full" size="sm">
+                  <Button 
+                    className="mt-3 w-full" 
+                    size="sm"
+                    onClick={() => router.push('/profile')}
+                  >
                     Edit Profile
                   </Button>
                 </div>

@@ -31,10 +31,14 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials) return null
+        if (!credentials) {
+          return null
+        }
 
         const validatedFields = loginSchema.safeParse(credentials)
-        if (!validatedFields.success) return null
+        if (!validatedFields.success) {
+          return null
+        }
 
         const { email, password } = validatedFields.data
 
@@ -42,11 +46,13 @@ export const authOptions: NextAuthOptions = {
           where: { email },
         })
 
-        if (!user || !user.password) return null
+        if (!user || !user.password) {
+          return null
+        }
 
         const passwordsMatch = await bcrypt.compare(password, user.password)
+        
         if (!passwordsMatch) return null
-
         return {
           id: user.id,
           name: user.name,

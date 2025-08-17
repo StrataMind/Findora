@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
 export default function Home() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50">
@@ -19,7 +19,12 @@ export default function Home() {
               <Link href="/products">
                 <Button variant="ghost" size="sm">Browse Products</Button>
               </Link>
-              {session ? (
+              {status === 'loading' ? (
+                <div className="flex items-center space-x-4">
+                  <div className="h-9 w-16 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-9 w-20 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              ) : session ? (
                 <>
                   <span className="text-sm text-gray-700">
                     Welcome, {session.user?.name || session.user?.email}
@@ -54,7 +59,12 @@ export default function Home() {
           </p>
           
           <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
-            {session ? (
+            {status === 'loading' ? (
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <div className="h-12 w-32 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-12 w-32 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            ) : session ? (
               <Link href="/dashboard">
                 <Button size="lg" className="w-full sm:w-auto">
                   Go to Dashboard

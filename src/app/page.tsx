@@ -16,6 +16,9 @@ export default function Home() {
               <h1 className="text-2xl font-bold text-gray-900">Findora</h1>
             </div>
             <div className="flex items-center space-x-4">
+              <Link href="/products">
+                <Button variant="ghost" size="sm">Browse Products</Button>
+              </Link>
               {session ? (
                 <>
                   <span className="text-sm text-gray-700">

@@ -22,36 +22,41 @@ export default function Home() {
               <h1 className="text-2xl font-bold text-gray-900">Findora</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <Link href="/products">
-                <Button variant="ghost" size="sm">Browse Products</Button>
-              </Link>
               {!mounted ? (
                 <div className="flex items-center space-x-4">
+                  <div className="h-9 w-24 bg-gray-200 rounded animate-pulse"></div>
                   <div className="h-9 w-16 bg-gray-200 rounded animate-pulse"></div>
                   <div className="h-9 w-20 bg-gray-200 rounded animate-pulse"></div>
                 </div>
-              ) : status === 'loading' ? (
-                <div className="flex items-center space-x-4">
-                  <div className="h-9 w-16 bg-gray-200 rounded animate-pulse"></div>
-                  <div className="h-9 w-20 bg-gray-200 rounded animate-pulse"></div>
-                </div>
-              ) : session ? (
-                <>
-                  <span className="text-sm text-gray-700">
-                    Welcome, {session.user?.name || session.user?.email}
-                  </span>
-                  <Link href="/dashboard">
-                    <Button size="sm">Dashboard</Button>
-                  </Link>
-                </>
               ) : (
                 <>
-                  <Link href="/auth/signin">
-                    <Button variant="outline" size="sm">Sign In</Button>
+                  <Link href="/products">
+                    <Button variant="ghost" size="sm">Browse Products</Button>
                   </Link>
-                  <Link href="/auth/signup">
-                    <Button size="sm">Sign Up</Button>
-                  </Link>
+                  {status === 'loading' ? (
+                    <div className="flex items-center space-x-4">
+                      <div className="h-9 w-16 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-9 w-20 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                  ) : session ? (
+                    <>
+                      <span className="text-sm text-gray-700">
+                        Welcome, {session.user?.name || session.user?.email}
+                      </span>
+                      <Link href="/dashboard">
+                        <Button size="sm">Dashboard</Button>
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link href="/auth/signin">
+                        <Button variant="outline" size="sm">Sign In</Button>
+                      </Link>
+                      <Link href="/auth/signup">
+                        <Button size="sm">Sign Up</Button>
+                      </Link>
+                    </>
+                  )}
                 </>
               )}
             </div>

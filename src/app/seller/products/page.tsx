@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -16,7 +16,13 @@ import {
   Package,
   TrendingUp,
   TrendingDown,
-  AlertCircle
+  AlertCircle,
+  CheckSquare,
+  Square,
+  MoreVertical,
+  ChevronDown,
+  Star,
+  StarOff
 } from 'lucide-react'
 
 interface Product {
@@ -58,6 +64,10 @@ export default function ProductsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
   const [currentPage, setCurrentPage] = useState(1)
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([])
+  const [bulkActionLoading, setBulkActionLoading] = useState(false)
+  const [showBulkActions, setShowBulkActions] = useState(false)
+  const bulkActionsRef = useRef<HTMLDivElement>(null)
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -70,6 +80,19 @@ export default function ProductsPage() {
       fetchProducts()
     }
   }, [status, currentPage, statusFilter, searchTerm])
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (bulkActionsRef.current && !bulkActionsRef.current.contains(event.target as Node)) {
+        setShowBulkActions(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
   const fetchProducts = async () => {
     try {
@@ -136,6 +159,98 @@ export default function ProductsPage() {
       style: 'currency',
       currency: 'USD'
     }).format(price)
+  }
+
+  // Bulk Actions Functions
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedProducts(products.map(p => p.id))
+    } else {
+      setSelectedProducts([])
+    }
+  }
+
+  const handleSelectProduct = (productId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedProducts(prev => [...prev, productId])
+    } else {
+      setSelectedProducts(prev => prev.filter(id => id !== productId))
+    }
+  }
+
+  const bulkUpdateStatus = async (status: string) => {
+    if (selectedProducts.length === 0) return
+
+    setBulkActionLoading(true)
+    try {
+      const promises = selectedProducts.map(productId =>
+        fetch(`/api/products/${productId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        })
+      )
+
+      await Promise.all(promises)
+      fetchProducts()
+      setSelectedProducts([])
+      setShowBulkActions(false)
+    } catch (error) {
+      console.error('Bulk status update failed:', error)
+    } finally {
+      setBulkActionLoading(false)
+    }
+  }
+
+  const bulkDelete = async () => {
+    if (selectedProducts.length === 0) return
+    
+    if (!confirm(`Are you sure you want to delete ${selectedProducts.length} products? This action cannot be undone.`)) {
+      return
+    }
+
+    setBulkActionLoading(true)
+    try {
+      const promises = selectedProducts.map(productId =>
+        fetch(`/api/products/${productId}`, {
+          method: 'DELETE'
+        })
+      )
+
+      await Promise.all(promises)
+      fetchProducts()
+      setSelectedProducts([])
+      setShowBulkActions(false)
+    } catch (error) {
+      console.error('Bulk delete failed:', error)
+    } finally {
+      setBulkActionLoading(false)
+    }
+  }
+
+  const bulkToggleFeatured = async () => {
+    if (selectedProducts.length === 0) return
+
+    setBulkActionLoading(true)
+    try {
+      const promises = selectedProducts.map(async (productId) => {
+        const product = products.find(p => p.id === productId)
+        return fetch(`/api/products/${productId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ featured: !product?.featured })
+        })
+      })
+
+      await Promise.all(promises)
+      fetchProducts()
+      setSelectedProducts([])
+      setShowBulkActions(false)
+    } catch (error) {
+      console.error('Bulk featured toggle failed:', error)
+    } finally {
+      setBulkActionLoading(false)
+    }
   }
 
   if (status === 'loading' || loading) {
@@ -254,6 +369,89 @@ export default function ProductsPage() {
           </div>
         </div>
 
+        {/* Bulk Actions Bar */}
+        {selectedProducts.length > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <span className="text-sm font-medium text-blue-900">
+                  {selectedProducts.length} product{selectedProducts.length !== 1 ? 's' : ''} selected
+                </span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setSelectedProducts([])}
+                  className="text-blue-700 hover:text-blue-900"
+                >
+                  Clear selection
+                </Button>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="relative" ref={bulkActionsRef}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setShowBulkActions(!showBulkActions)}
+                    disabled={bulkActionLoading}
+                    className="bg-white"
+                  >
+                    <MoreVertical className="h-4 w-4 mr-2" />
+                    Bulk Actions
+                    <ChevronDown className="h-4 w-4 ml-2" />
+                  </Button>
+                  {showBulkActions && (
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg border border-gray-200 z-10">
+                      <div className="py-1">
+                        <div className="px-3 py-2 text-xs font-medium text-gray-500 uppercase">Status Actions</div>
+                        <button
+                          onClick={() => bulkUpdateStatus('ACTIVE')}
+                          disabled={bulkActionLoading}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                        >
+                          Mark as Active
+                        </button>
+                        <button
+                          onClick={() => bulkUpdateStatus('INACTIVE')}
+                          disabled={bulkActionLoading}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                        >
+                          Mark as Inactive
+                        </button>
+                        <button
+                          onClick={() => bulkUpdateStatus('DRAFT')}
+                          disabled={bulkActionLoading}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                        >
+                          Mark as Draft
+                        </button>
+                        <div className="border-t border-gray-100 my-1"></div>
+                        <div className="px-3 py-2 text-xs font-medium text-gray-500 uppercase">Other Actions</div>
+                        <button
+                          onClick={bulkToggleFeatured}
+                          disabled={bulkActionLoading}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 flex items-center"
+                        >
+                          <Star className="h-4 w-4 mr-2" />
+                          Toggle Featured
+                        </button>
+                        <div className="border-t border-gray-100 my-1"></div>
+                        <button
+                          onClick={bulkDelete}
+                          disabled={bulkActionLoading}
+                          className="w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50 disabled:opacity-50 flex items-center"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete Selected
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Products Table */}
         <div className="bg-white shadow rounded-lg overflow-hidden">
           {products.length === 0 ? (
@@ -278,6 +476,22 @@ export default function ProductsPage() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
+                      <button
+                        onClick={() => handleSelectAll(selectedProducts.length !== products.length)}
+                        className="flex items-center"
+                      >
+                        {selectedProducts.length === products.length && products.length > 0 ? (
+                          <CheckSquare className="h-4 w-4 text-blue-600" />
+                        ) : selectedProducts.length > 0 ? (
+                          <div className="h-4 w-4 bg-blue-600 border-2 border-blue-600 rounded flex items-center justify-center">
+                            <div className="h-1 w-2 bg-white"></div>
+                          </div>
+                        ) : (
+                          <Square className="h-4 w-4 text-gray-400" />
+                        )}
+                      </button>
+                    </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Product
                     </th>
@@ -301,6 +515,18 @@ export default function ProductsPage() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {products.map((product) => (
                     <tr key={product.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <button
+                          onClick={() => handleSelectProduct(product.id, !selectedProducts.includes(product.id))}
+                          className="flex items-center"
+                        >
+                          {selectedProducts.includes(product.id) ? (
+                            <CheckSquare className="h-4 w-4 text-blue-600" />
+                          ) : (
+                            <Square className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                          )}
+                        </button>
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-16 w-16">

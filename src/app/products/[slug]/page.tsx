@@ -1,9 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter, useParams, useSearchParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import BackButton from '@/components/ui/back-button'
+import { useAnalytics } from '@/lib/analytics'
+import { useRecommendations } from '@/lib/recommendations'
 import { 
   ShoppingCart, 
   Heart, 
@@ -79,7 +82,11 @@ interface Product {
 export default function ProductPage() {
   const router = useRouter()
   const params = useParams()
+  const searchParams = useSearchParams()
+  const { data: session } = useSession()
   const slug = params.slug as string
+  const analytics = useAnalytics()
+  const recommendations = useRecommendations()
 
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
@@ -93,6 +100,46 @@ export default function ProductPage() {
       fetchProduct()
     }
   }, [slug])
+
+  // Track product view when product is loaded
+  useEffect(() => {
+    if (product) {
+      // Determine the source of the view
+      const searchTerm = searchParams.get('search')
+      const fromCategory = searchParams.get('category')
+      const referrer = document.referrer
+      
+      let source: 'search' | 'category' | 'homepage' | 'direct' | 'recommendation' = 'direct'
+      
+      if (searchTerm) {
+        source = 'search'
+      } else if (fromCategory) {
+        source = 'category'
+      } else if (referrer && referrer.includes(window.location.origin)) {
+        if (referrer.includes('/products')) {
+          source = 'recommendation'
+        } else if (referrer === window.location.origin + '/') {
+          source = 'homepage'
+        }
+      }
+
+      // Track the product view
+      analytics.trackProductView(product.id, source, {
+        userId: session?.user?.id,
+        searchTerm: searchTerm || undefined,
+        categoryId: fromCategory || product.category?.id,
+        referrer
+      })
+
+      // Track recently viewed for recommendations
+      recommendations.trackProductView(product.id)
+
+      // Mark search impression as clicked if coming from search
+      if (searchTerm) {
+        analytics.markSearchImpressionClicked(product.id, searchTerm)
+      }
+    }
+  }, [product, searchParams, session, analytics, recommendations])
 
   const fetchProduct = async () => {
     try {

@@ -11,6 +11,8 @@ import AvailabilityFilter from '@/components/filters/availability-filter'
 import BackButton from '@/components/ui/back-button'
 import NoResults from '@/components/search/no-results'
 import { useSearchAnalytics } from '@/lib/search-analytics'
+import { useAnalytics } from '@/lib/analytics'
+import { useSession } from 'next-auth/react'
 import { 
   Search, 
   Filter, 
@@ -84,7 +86,9 @@ const sortOptions = [
 export default function ProductsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { data: session } = useSession()
   const { trackSearch, trackResultClick } = useSearchAnalytics()
+  const analytics = useAnalytics()
   
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -166,6 +170,19 @@ export default function ProductsPage() {
               featuredOnly
             }
           )
+
+          // Track search impressions for each product
+          data.products.forEach((product, index) => {
+            analytics.trackSearchImpression(
+              product.id,
+              searchTerm,
+              index + 1 + ((currentPage - 1) * 12), // Position in overall results
+              {
+                userId: session?.user?.id,
+                categoryFilter: selectedCategory !== 'all' ? selectedCategory : undefined
+              }
+            )
+          })
         }
       }
     } catch (error) {

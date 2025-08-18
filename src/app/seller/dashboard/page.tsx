@@ -226,7 +226,7 @@ export default function SellerDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <div className="bg-white p-6 rounded-lg shadow">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Manage Products</h3>
             <p className="text-gray-600 mb-4">Add, edit, and manage your product inventory</p>
@@ -287,6 +287,17 @@ export default function SellerDashboard() {
               onClick={() => router.push('/seller/documents')}
             >
               Upload Documents
+            </Button>
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Analytics</h3>
+            <p className="text-gray-600 mb-4">Track product performance and insights</p>
+            <Button 
+              className="w-full" 
+              onClick={() => router.push('/seller/analytics')}
+            >
+              View Analytics
             </Button>
           </div>
         </div>

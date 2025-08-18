@@ -74,6 +74,7 @@ interface Product {
   updatedAt: string
 }
 
+
 export default function ProductPage() {
   const router = useRouter()
   const params = useParams()

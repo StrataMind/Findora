@@ -6,7 +6,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const limit = Math.min(parseInt(searchParams.get('limit') || '6'), 20)
 
-    const sellers = await db.seller.findMany({
+    // Try to get verified sellers with good ratings first
+    let sellers = await db.sellerProfile.findMany({
       where: {
         verificationStatus: 'VERIFIED',
         averageRating: { gte: 4.0 }
@@ -15,15 +16,14 @@ export async function GET(request: NextRequest) {
         id: true,
         businessName: true,
         description: true,
-        logo: true,
+        logoUrl: true,
         verificationStatus: true,
         averageRating: true,
         totalSales: true,
         createdAt: true,
         _count: {
           select: {
-            products: true,
-            reviews: true
+            products: true
           }
         }
       },
@@ -34,10 +34,65 @@ export async function GET(request: NextRequest) {
       take: limit
     })
 
+    // If no verified sellers with high ratings, get any verified sellers
+    if (sellers.length === 0) {
+      sellers = await db.sellerProfile.findMany({
+        where: {
+          verificationStatus: 'VERIFIED'
+        },
+        select: {
+          id: true,
+          businessName: true,
+          description: true,
+          logoUrl: true,
+          verificationStatus: true,
+          averageRating: true,
+          totalSales: true,
+          createdAt: true,
+          _count: {
+            select: {
+              products: true
+            }
+          }
+        },
+        orderBy: [
+          { totalSales: 'desc' },
+          { createdAt: 'desc' }
+        ],
+        take: limit
+      })
+    }
+
+    // If still no sellers, get any sellers for development
+    if (sellers.length === 0) {
+      sellers = await db.sellerProfile.findMany({
+        select: {
+          id: true,
+          businessName: true,
+          description: true,
+          logoUrl: true,
+          verificationStatus: true,
+          averageRating: true,
+          totalSales: true,
+          createdAt: true,
+          _count: {
+            select: {
+              products: true
+            }
+          }
+        },
+        orderBy: [
+          { createdAt: 'desc' }
+        ],
+        take: limit
+      })
+    }
+
     const formattedSellers = sellers.map(seller => ({
       ...seller,
+      logo: seller.logoUrl,
       totalProducts: seller._count.products,
-      totalReviews: seller._count.reviews
+      totalReviews: 0 // Remove reviews count since SellerProfile doesn't have direct reviews
     }))
 
     return NextResponse.json({

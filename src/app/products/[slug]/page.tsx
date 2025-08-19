@@ -8,6 +8,7 @@ import BackButton from '@/components/ui/back-button'
 import { useAnalytics } from '@/lib/analytics'
 import { useRecommendations } from '@/lib/recommendations'
 import AddToCartButton from '@/components/product/add-to-cart-button'
+import WishlistButton from '@/components/product/wishlist-button'
 import Header from '@/components/navigation/header'
 import { 
   Heart, 
@@ -375,10 +376,22 @@ export default function ProductPage() {
               />
 
               <div className="flex space-x-4">
-                <Button size="lg" variant="outline" className="flex-1">
-                  <Heart className="h-5 w-5 mr-2" />
-                  Add to Wishlist
-                </Button>
+                <WishlistButton
+                  product={{
+                    id: product.id,
+                    name: product.name,
+                    slug: product.slug,
+                    price: product.price,
+                    compareAtPrice: product.compareAtPrice,
+                    inventory: product.inventory,
+                    images: product.images,
+                    seller: product.seller,
+                    category: product.category
+                  }}
+                  size="lg"
+                  variant="outline"
+                  className="flex-1"
+                />
                 <Button size="lg" variant="outline">
                   <Share2 className="h-5 w-5" />
                 </Button>

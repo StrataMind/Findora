@@ -5,6 +5,7 @@ import Providers from "@/components/providers/session-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "sonner";
 import { CartProvider } from "@/contexts/cart-context";
+import { WishlistProvider } from "@/contexts/wishlist-context";
 import CartSidebar from "@/components/cart/cart-sidebar";
 
 const geistSans = Geist({
@@ -20,7 +21,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Findora - E-commerce Platform",
   description: "Modern e-commerce platform with secure authentication and seamless user experience",
-  manifest: "/manifest.json",
   keywords: ["e-commerce", "shopping", "secure", "authentication", "next.js"],
   authors: [{ name: "Findora Team" }],
   icons: {
@@ -34,7 +34,6 @@ export function generateViewport() {
     width: 'device-width',
     initialScale: 1,
     maximumScale: 1,
-    themeColor: '#3b82f6',
   }
 }
 
@@ -45,29 +44,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                  navigator.serviceWorker.register('/sw.js');
-                });
-              }
-            `,
-          }}
-        />
-      </head>
+      <head />
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          <CartProvider>
-            {children}
-            <CartSidebar />
-            <Toaster />
-            <Sonner position="top-right" />
-          </CartProvider>
+          <WishlistProvider>
+            <CartProvider>
+              {children}
+              <CartSidebar />
+              <Toaster />
+              <Sonner position="top-right" />
+            </CartProvider>
+          </WishlistProvider>
         </Providers>
       </body>
     </html>

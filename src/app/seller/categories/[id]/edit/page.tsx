@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import BackButton from '@/components/ui/back-button'
 import { ArrowLeft, Save, Loader2, Trash2 } from 'lucide-react'
 import Link from 'next/link'
-import { ImageUpload } from '@/components/ui/image-upload'
+import ImageUpload from '@/components/ui/image-upload'
 
 interface Category {
   id: string

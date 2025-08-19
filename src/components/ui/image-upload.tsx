@@ -21,7 +21,7 @@ interface ImageUploadProps {
   existingImages?: { id: string; url: string; altText?: string }[]
 }
 
-export default function ImageUpload({ 
+function ImageUpload({ 
   maxFiles = 10, 
   maxSize = 5, 
   onImagesChange,
@@ -243,3 +243,5 @@ export default function ImageUpload({
     </div>
   )
 }
+
+export default ImageUpload

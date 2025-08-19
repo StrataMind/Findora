@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft, Save, Loader2 } from 'lucide-react'
 import Link from 'next/link'
-import { ImageUpload } from '@/components/ui/image-upload'
+import ImageUpload from '@/components/ui/image-upload'
 import BackButton from '@/components/ui/back-button'
 
 interface Category {

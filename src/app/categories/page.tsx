@@ -9,6 +9,7 @@ import {
   Search, 
   Package, 
   ArrowRight,
+  ArrowLeft,
   Grid3X3,
   List,
   Filter,
@@ -62,6 +63,16 @@ export default function CategoriesPage() {
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-8">
+            {/* Back Button */}
+            <div className="mb-6">
+              <Link href="/">
+                <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Home
+                </Button>
+              </Link>
+            </div>
+            
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">Categories</h1>

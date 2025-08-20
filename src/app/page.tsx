@@ -3,7 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
+import PremiumButton from '@/components/ui/premium-button'
+import { HeroSection } from '@/components/home/hero-section'
+import { DiscoveryZones } from '@/components/home/discovery-zones'
 import { useRecommendations, Product } from '@/lib/recommendations'
 import { 
   TrendingUp, 
@@ -18,7 +22,9 @@ import {
   Eye,
   Sparkles,
   Clock,
-  Grid3X3
+  Grid3X3,
+  MapPin,
+  Leaf
 } from 'lucide-react'
 
 interface Seller {
@@ -242,32 +248,48 @@ export default function Home() {
   )
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Navigation */}
-      <nav className="bg-white shadow">
+      <motion.nav 
+        className="bg-white/95 backdrop-blur-sm shadow-lg fixed top-0 left-0 right-0 z-50"
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
+          <div className="flex justify-between items-center h-16">
+            <motion.div 
+              className="flex items-center"
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2 }}
+            >
               <Link href="/">
-                <h1 className="text-2xl font-bold text-gray-900">Findora</h1>
+                <h1 className="text-2xl font-bold bg-gradient-coral bg-clip-text text-transparent font-accent">
+                  Findora
+                </h1>
               </Link>
-            </div>
+            </motion.div>
             <div className="flex items-center space-x-4">
               {!mounted ? (
                 <div className="flex items-center space-x-4">
-                  <div className="h-9 w-24 bg-gray-200 rounded animate-pulse"></div>
-                  <div className="h-9 w-16 bg-gray-200 rounded animate-pulse"></div>
-                  <div className="h-9 w-20 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-9 w-24 bg-gray-200 rounded-lg animate-pulse skeleton"></div>
+                  <div className="h-9 w-16 bg-gray-200 rounded-lg animate-pulse skeleton"></div>
+                  <div className="h-9 w-20 bg-gray-200 rounded-lg animate-pulse skeleton"></div>
                 </div>
               ) : (
-                <>
+                <motion.div 
+                  className="flex items-center space-x-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                >
                   <Link href="/products">
-                    <Button variant="ghost" size="sm">Browse Products</Button>
+                    <PremiumButton variant="ghost" size="sm">Browse Products</PremiumButton>
                   </Link>
                   {status === 'loading' ? (
                     <div className="flex items-center space-x-4">
-                      <div className="h-9 w-16 bg-gray-200 rounded animate-pulse"></div>
-                      <div className="h-9 w-20 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-9 w-16 bg-gray-200 rounded-lg animate-pulse skeleton"></div>
+                      <div className="h-9 w-20 bg-gray-200 rounded-lg animate-pulse skeleton"></div>
                     </div>
                   ) : session ? (
                     <>
@@ -275,58 +297,35 @@ export default function Home() {
                         Welcome, {session.user?.name || session.user?.email}
                       </span>
                       <Link href="/dashboard">
-                        <Button size="sm">Dashboard</Button>
+                        <PremiumButton variant="primary" size="sm">Dashboard</PremiumButton>
                       </Link>
                     </>
                   ) : (
                     <>
                       <Link href="/auth/signin">
-                        <Button variant="outline" size="sm">Sign In</Button>
+                        <PremiumButton variant="outline" size="sm">Sign In</PremiumButton>
                       </Link>
                       <Link href="/auth/signup">
-                        <Button size="sm">Sign Up</Button>
+                        <PremiumButton variant="primary" size="sm" glow>Sign Up</PremiumButton>
                       </Link>
                     </>
                   )}
-                </>
+                </motion.div>
               )}
             </div>
           </div>
         </div>
-      </nav>
+      </motion.nav>
 
-      {/* Hero Section */}
-      <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-purple-800 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold sm:text-6xl">
-              Discover Amazing Products
-            </h1>
-            <p className="mt-6 text-lg text-blue-100 max-w-3xl mx-auto">
-              Your modern e-commerce platform with personalized recommendations, 
-              secure shopping, and thousands of products from verified sellers.
-            </p>
-            
-            <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
-              <Link href="/products">
-                <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 w-full sm:w-auto">
-                  <ShoppingCart className="h-5 w-5 mr-2" />
-                  Start Shopping
-                </Button>
-              </Link>
-              {!session && (
-                <Link href="/auth/signup">
-                  <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-blue-600 w-full sm:w-auto">
-                    Join Findora
-                  </Button>
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Add padding for fixed navigation */}
+      <div className="pt-16">
+        {/* Hero Section */}
+        <HeroSection />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Discovery Zones */}
+        <DiscoveryZones />
+
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Categories Showcase */}
         <section className="py-16">
           <SectionHeader
@@ -554,20 +553,76 @@ export default function Home() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h3 className="text-2xl font-bold text-white mb-4">Findora</h3>
-            <p className="mb-4">Your trusted e-commerce platform</p>
-            <div className="flex justify-center space-x-6">
-              <Link href="/products" className="hover:text-white">Products</Link>
-              <Link href="/auth/signin" className="hover:text-white">Sign In</Link>
-              <Link href="/auth/signup" className="hover:text-white">Sign Up</Link>
+        {/* Footer */}
+        <motion.footer 
+          className="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-gray-300 py-16 relative overflow-hidden"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          {/* Background Elements */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+          
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div className="text-center">
+              <motion.h3 
+                className="text-3xl font-bold text-white mb-4 font-accent"
+                initial={{ y: 20, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+              >
+                Findora
+              </motion.h3>
+              <motion.p 
+                className="text-xl mb-8 text-gray-300"
+                initial={{ y: 20, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4 }}
+              >
+                Your premium marketplace experience
+              </motion.p>
+              
+              <motion.div 
+                className="flex justify-center space-x-8 mb-8"
+                initial={{ y: 20, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.6 }}
+              >
+                <Link href="/products" className="hover:text-coral transition-colors duration-300 flex items-center gap-2">
+                  <Package className="w-4 h-4" />
+                  Products
+                </Link>
+                <Link href="/auth/signin" className="hover:text-coral transition-colors duration-300 flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  Sign In
+                </Link>
+                <Link href="/auth/signup" className="hover:text-coral transition-colors duration-300 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  Join Us
+                </Link>
+              </motion.div>
+
+              <motion.div
+                className="border-t border-white/20 pt-8 text-sm text-gray-400"
+                initial={{ y: 20, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.8 }}
+              >
+                <p>&copy; 2024 Findora. Crafted with ❤️ for the future of e-commerce.</p>
+              </motion.div>
             </div>
           </div>
-        </div>
-      </footer>
+
+          {/* Floating Elements */}
+          <div className="absolute top-10 left-10 w-32 h-32 bg-coral/10 rounded-full blur-2xl animate-float"></div>
+          <div className="absolute bottom-10 right-10 w-24 h-24 bg-gold/10 rounded-full blur-2xl animate-float" style={{ animationDelay: '2s' }}></div>
+        </motion.footer>
+      </div>
     </div>
   )
 }

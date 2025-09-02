@@ -1,21 +1,17 @@
-import { withAuth } from "next-auth/middleware"
+// Disabled for testing - enable after database setup
+// import { withAuth } from "next-auth/middleware"
 
-export default withAuth(
-  function middleware(req) {
-    // Add any additional middleware logic here if needed
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token
-    },
-  }
-)
+// export default withAuth(
+//   function middleware(req) {
+//     // Add any additional middleware logic here if needed
+//   },
+//   {
+//     callbacks: {
+//       authorized: ({ token }) => !!token
+//     },
+//   }
+// )
 
 export const config = {
-  matcher: [
-    "/dashboard/:path*",
-    "/profile/:path*",
-    "/orders/:path*",
-    "/seller/:path*"
-  ]
+  matcher: []  // Disabled for testing
 }

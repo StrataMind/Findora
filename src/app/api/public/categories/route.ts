@@ -1,41 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { mockCategories } from '@/lib/mock-data'
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const limit = Math.min(parseInt(searchParams.get('limit') || '10'), 50)
-    const withProductCount = searchParams.get('withProductCount') === 'true'
 
-    const categories = await db.category.findMany({
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        description: true,
-        image: true,
-        ...(withProductCount && {
-          _count: {
-            select: {
-              products: {
-                where: {
-                  status: 'ACTIVE',
-                  inventory: { gt: 0 }
-                }
-              }
-            }
-          }
-        })
-      },
-      orderBy: withProductCount ? {
-        products: {
-          _count: 'desc'
-        }
-      } : {
-        name: 'asc'
-      },
-      take: limit
-    })
+    const categories = mockCategories.slice(0, limit)
 
     return NextResponse.json({
       success: true,

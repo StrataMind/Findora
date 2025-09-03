@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { prisma } from '@/lib/prisma'
+import { db } from '@/lib/db'
 import { z } from 'zod'
 
 const createCategorySchema = z.object({
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const parentId = searchParams.get('parentId')
     const search = searchParams.get('search')
 
-    let where: any = {}
+    const where: Record<string, any> = {}
 
     // Filter by parent category
     if (parentId === 'null' || parentId === '') {
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       ]
     }
 
-    const categories = await prisma.category.findMany({
+    const categories = await db.category.findMany({
       where,
       include: {
         _count: {
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await db.user.findUnique({
       where: { email: session.user?.email! },
       include: { seller: true },
     })
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
     const validatedData = createCategorySchema.parse(body)
 
     // Check if slug already exists
-    const existingSlug = await prisma.category.findUnique({
+    const existingSlug = await db.category.findUnique({
       where: { slug: validatedData.slug },
     })
 
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if name already exists
-    const existingName = await prisma.category.findUnique({
+    const existingName = await db.category.findUnique({
       where: { name: validatedData.name },
     })
 
@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
 
     // If parentId is provided, check if parent exists
     if (validatedData.parentId) {
-      const parentCategory = await prisma.category.findUnique({
+      const parentCategory = await db.category.findUnique({
         where: { id: validatedData.parentId },
       })
 
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const category = await prisma.category.create({
+    const category = await db.category.create({
       data: validatedData,
       include: {
         _count: {

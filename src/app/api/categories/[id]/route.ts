@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { prisma } from '@/lib/prisma'
+import { db } from '@/lib/db'
 import { z } from 'zod'
 
 const updateCategorySchema = z.object({
@@ -18,7 +18,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const category = await prisma.category.findUnique({
+    const category = await db.category.findUnique({
       where: { id: params.id },
       include: {
         _count: {
@@ -85,12 +85,12 @@ export async function PUT(
       )
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user?.email! },
-      include: { seller: true },
+    const user = await db.user.findUnique({
+      where: { email: session.user?.email || '' },
+      include: { sellerProfile: true },
     })
 
-    if (!user?.seller) {
+    if (!user?.sellerProfile) {
       return NextResponse.json(
         { error: 'Seller account required' },
         { status: 403 }
@@ -101,7 +101,7 @@ export async function PUT(
     const validatedData = updateCategorySchema.parse(body)
 
     // Check if category exists
-    const existingCategory = await prisma.category.findUnique({
+    const existingCategory = await db.category.findUnique({
       where: { id: params.id },
     })
 
@@ -114,7 +114,7 @@ export async function PUT(
 
     // Check if slug already exists (excluding current category)
     if (validatedData.slug && validatedData.slug !== existingCategory.slug) {
-      const existingSlug = await prisma.category.findUnique({
+      const existingSlug = await db.category.findUnique({
         where: { slug: validatedData.slug },
       })
 
@@ -128,7 +128,7 @@ export async function PUT(
 
     // Check if name already exists (excluding current category)
     if (validatedData.name && validatedData.name !== existingCategory.name) {
-      const existingName = await prisma.category.findUnique({
+      const existingName = await db.category.findUnique({
         where: { name: validatedData.name },
       })
 
@@ -142,7 +142,7 @@ export async function PUT(
 
     // If parentId is provided, check if parent exists and prevent circular reference
     if (validatedData.parentId) {
-      const parentCategory = await prisma.category.findUnique({
+      const parentCategory = await db.category.findUnique({
         where: { id: validatedData.parentId },
       })
 
@@ -171,7 +171,7 @@ export async function PUT(
       }
     }
 
-    const category = await prisma.category.update({
+    const category = await db.category.update({
       where: { id: params.id },
       data: validatedData,
       include: {
@@ -218,12 +218,12 @@ export async function DELETE(
       )
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.user?.email! },
-      include: { seller: true },
+    const user = await db.user.findUnique({
+      where: { email: session.user?.email || '' },
+      include: { sellerProfile: true },
     })
 
-    if (!user?.seller) {
+    if (!user?.sellerProfile) {
       return NextResponse.json(
         { error: 'Seller account required' },
         { status: 403 }
@@ -231,7 +231,7 @@ export async function DELETE(
     }
 
     // Check if category exists
-    const category = await prisma.category.findUnique({
+    const category = await db.category.findUnique({
       where: { id: params.id },
       include: {
         _count: {
@@ -266,7 +266,7 @@ export async function DELETE(
       )
     }
 
-    await prisma.category.delete({
+    await db.category.delete({
       where: { id: params.id },
     })
 
@@ -284,7 +284,7 @@ export async function DELETE(
 async function getDescendants(categoryId: string): Promise<string[]> {
   const descendants: string[] = []
   
-  const children = await prisma.category.findMany({
+  const children = await db.category.findMany({
     where: { parentId: categoryId },
     select: { id: true },
   })

@@ -1,6 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

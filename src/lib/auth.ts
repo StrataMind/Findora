@@ -2,9 +2,13 @@ import { NextAuthOptions } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { PrismaAdapter } from '@next-auth/prisma-adapter'
+import { PrismaClient } from '@prisma/client'
 import { db } from './db'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+
+// Create a separate Prisma client for NextAuth adapter
+const authDb = new PrismaClient()
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -12,7 +16,7 @@ const loginSchema = z.object({
 })
 
 export const authOptions: NextAuthOptions = {
-  // Remove PrismaAdapter - causes issues on Vercel
+  adapter: PrismaAdapter(authDb),
   session: {
     strategy: 'jwt',
   },

@@ -61,6 +61,31 @@ export default function Home() {
     loadHomePageData()
   }, [])
 
+  // Create user in database after OAuth login
+  useEffect(() => {
+    if (session?.user?.email && status === 'authenticated') {
+      createUserInDatabase()
+    }
+  }, [session, status])
+
+  const createUserInDatabase = async () => {
+    try {
+      const response = await fetch('/api/auth/create-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      
+      if (response.ok) {
+        const result = await response.json()
+        console.log('User database sync:', result.message)
+      }
+    } catch (error) {
+      console.error('Failed to sync user with database:', error)
+    }
+  }
+
   const loadHomePageData = async () => {
     try {
       setLoading(true)

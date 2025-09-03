@@ -24,6 +24,13 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code"
+        }
+      }
     }),
     CredentialsProvider({
       name: 'credentials',
@@ -65,15 +72,25 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
-      // Always allow OAuth sign ins (Google, etc.)
-      if (account?.provider === 'google') {
+      try {
+        // Always allow OAuth sign ins
+        if (account?.provider === 'google') {
+          console.log('Google OAuth sign in attempt:', user?.email)
+          return true
+        }
+        
+        // Always allow credential sign ins
+        if (account?.provider === 'credentials') {
+          console.log('Credentials sign in attempt:', user?.email)
+          return true
+        }
+        
+        console.log('Sign in attempt with provider:', account?.provider)
         return true
+      } catch (error) {
+        console.error('SignIn callback error:', error)
+        return false
       }
-      // Allow credential sign ins
-      if (account?.provider === 'credentials') {
-        return true
-      }
-      return true
     },
     async redirect({ url, baseUrl }) {
       console.log('NextAuth redirect:', { url, baseUrl })

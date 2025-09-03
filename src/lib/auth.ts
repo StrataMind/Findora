@@ -18,6 +18,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/auth/signin',
+    error: '/auth/signin', // Redirect errors back to sign-in page
   },
   providers: [
     GoogleProvider({
@@ -64,22 +65,46 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
-      // Allow all OAuth and credential sign ins
+      // Always allow OAuth sign ins (Google, etc.)
+      if (account?.provider === 'google') {
+        return true
+      }
+      // Allow credential sign ins
+      if (account?.provider === 'credentials') {
+        return true
+      }
       return true
     },
     async redirect({ url, baseUrl }) {
-      // Always redirect to home page after successful sign in
-      if (url.startsWith("/auth/signin") || url.startsWith("/api/auth")) {
+      console.log('NextAuth redirect:', { url, baseUrl })
+      
+      // Always redirect to home page after any auth operation
+      if (url.includes('/auth/') || url.includes('/api/auth/')) {
+        console.log('Redirecting to home page:', baseUrl)
         return baseUrl
       }
-      // Allow relative callback URLs
-      if (url.startsWith("/")) {
+      
+      // If someone tries to access /dashboard, redirect to home
+      if (url.includes('/dashboard')) {
+        console.log('Dashboard redirect to home:', baseUrl)
+        return baseUrl
+      }
+      
+      // For any other relative URL, allow it if it's safe
+      if (url.startsWith('/') && !url.includes('/auth/')) {
         return `${baseUrl}${url}`
       }
-      // Allow callback URLs on the same origin
-      else if (new URL(url).origin === baseUrl) {
-        return url
+      
+      // For same origin URLs
+      try {
+        if (new URL(url).origin === baseUrl) {
+          return url
+        }
+      } catch (e) {
+        // Invalid URL, default to home
       }
+      
+      console.log('Default redirect to home:', baseUrl)
       return baseUrl
     },
     async jwt({ token, user, trigger }) {

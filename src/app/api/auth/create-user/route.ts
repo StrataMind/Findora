@@ -14,6 +14,9 @@ export async function POST(req: NextRequest) {
     // Check if user already exists in database
     const existingUser = await db.user.findUnique({
       where: { email: session.user.email }
+    }).catch(error => {
+      console.error('Database findUnique error:', error)
+      return null
     })
 
     if (!existingUser) {
@@ -26,6 +29,9 @@ export async function POST(req: NextRequest) {
           role: 'BUYER',
           emailVerified: new Date(), // OAuth emails are pre-verified
         }
+      }).catch(error => {
+        console.error('Database create error:', error)
+        throw new Error('Failed to create user in database')
       })
 
       return NextResponse.json({ 

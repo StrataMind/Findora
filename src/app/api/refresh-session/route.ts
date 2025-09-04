@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/db'
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
@@ -12,7 +12,6 @@ export async function GET(request: NextRequest) {
     }
 
     // Get fresh user data from database
-    console.log('Fetching user status for:', session.user.email)
     const user = await db.user.findUnique({
       where: { email: session.user.email },
       select: {
@@ -21,39 +20,31 @@ export async function GET(request: NextRequest) {
         name: true,
         role: true,
         isSuperuser: true,
-        superuserLevel: true,
-        canCreateProducts: true,
-        canModerateContent: true,
-        canViewAnalytics: true,
-        canManageUsers: true,
-        canFeatureProducts: true
+        superuserLevel: true
       }
     })
-    
-    console.log('User data from database:', user)
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     return NextResponse.json({
-      user: {
-        id: user.id,
-        role: user.role,
-        isSuperuser: user.isSuperuser,
-        superuserLevel: user.superuserLevel,
-        permissions: {
-          canCreateProducts: user.canCreateProducts,
-          canModerateContent: user.canModerateContent,
-          canViewAnalytics: user.canViewAnalytics,
-          canManageUsers: user.canManageUsers,
-          canFeatureProducts: user.canFeatureProducts
+      message: 'Session data refreshed',
+      session: {
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          isSuperuser: user.isSuperuser,
+          superuserLevel: user.superuserLevel
         }
-      }
+      },
+      databaseUser: user
     })
 
   } catch (error) {
-    console.error('Error fetching user status:', error)
+    console.error('Error refreshing session:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

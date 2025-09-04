@@ -2,7 +2,7 @@
 
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Package, ShoppingBag, ClipboardList, Crown } from 'lucide-react'
@@ -10,12 +10,28 @@ import { ArrowLeft, Package, ShoppingBag, ClipboardList, Crown } from 'lucide-re
 export default function Dashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const [userStatus, setUserStatus] = useState<any>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/signin')
+    } else if (session?.user) {
+      loadUserStatus()
     }
-  }, [status, router])
+  }, [status, router, session])
+
+  const loadUserStatus = async () => {
+    try {
+      const response = await fetch('/api/user/status')
+      if (response.ok) {
+        const data = await response.json()
+        setUserStatus(data.user)
+        console.log('User status loaded:', data.user)
+      }
+    } catch (error) {
+      console.error('Error loading user status:', error)
+    }
+  }
 
   if (status === 'loading') {
     return (

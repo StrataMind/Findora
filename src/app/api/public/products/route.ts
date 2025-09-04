@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { mockProducts } from '@/lib/mock-data'
+import { db } from '@/lib/db'
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,24 +7,107 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '12')
     const featured = searchParams.get('featured')
+    const search = searchParams.get('search')
+    const category = searchParams.get('category')
+    const sortBy = searchParams.get('sortBy') || 'createdAt'
+    const sortOrder = searchParams.get('sortOrder') || 'desc'
 
-    let products = [...mockProducts]
-    
+    // Build where clause
+    const where: any = {
+      status: 'ACTIVE',
+      seller: {
+        verificationStatus: 'VERIFIED'
+      }
+    }
+
     if (featured === 'true') {
-      products = products.filter(p => p.featured)
+      where.featured = true
+    }
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } }
+      ]
+    }
+
+    if (category) {
+      where.category = {
+        slug: category
+      }
+    }
+
+    // Build orderBy clause
+    let orderBy: any = {}
+    switch (sortBy) {
+      case 'price':
+        orderBy = { price: sortOrder }
+        break
+      case 'price_desc':
+        orderBy = { price: 'desc' }
+        break
+      case 'totalSales':
+        orderBy = { orderItems: { _count: sortOrder } }
+        break
+      default:
+        orderBy = { createdAt: sortOrder }
     }
 
     const skip = (page - 1) * limit
-    const paginatedProducts = products.slice(skip, skip + limit)
+
+    const [products, total] = await Promise.all([
+      db.product.findMany({
+        where,
+        include: {
+          images: {
+            orderBy: { position: 'asc' },
+            take: 1
+          },
+          seller: {
+            select: {
+              businessName: true,
+              averageRating: true
+            }
+          },
+          category: {
+            select: {
+              name: true,
+              slug: true
+            }
+          },
+          _count: {
+            select: {
+              reviews: true,
+              orderItems: true
+            }
+          }
+        },
+        orderBy,
+        skip,
+        take: limit
+      }),
+      db.product.count({ where })
+    ])
+
+    // Transform data to match frontend expectations
+    const transformedProducts = products.map(product => ({
+      ...product,
+      images: product.images.map(img => ({
+        id: img.id,
+        url: img.url,
+        alt: img.altText || product.name,
+        isPrimary: img.position === 0
+      }))
+    }))
 
     return NextResponse.json({
       success: true,
-      products: paginatedProducts,
+      products: transformedProducts,
       pagination: {
         page,
         limit,
-        total: products.length,
-        pages: Math.ceil(products.length / limit)
+        total,
+        pages: Math.ceil(total / limit)
       }
     })
 

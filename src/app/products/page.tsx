@@ -238,13 +238,13 @@ function ProductsContent() {
                         {product.name}
                       </h3>
                       <p className="text-sm text-gray-600 mb-2">
-                        by {product.seller.businessName}
+                        by {product.seller?.businessName || 'Unknown Seller'}
                       </p>
                       <div className="flex items-center gap-2 mb-2">
                         <div className="flex items-center">
                           <Star className="w-4 h-4 text-yellow-400 fill-current" />
                           <span className="text-sm text-gray-600 ml-1">
-                            {product.seller.averageRating.toFixed(1)}
+                            {product.seller?.averageRating?.toFixed(1) || '0.0'}
                           </span>
                         </div>
                         <span className="text-sm text-gray-400">
@@ -288,14 +288,14 @@ function ProductsContent() {
                         {product.description}
                       </p>
                       <p className="text-sm text-gray-600 mb-2">
-                        by {product.seller.businessName}
+                        by {product.seller?.businessName || 'Unknown Seller'}
                       </p>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                           <div className="flex items-center">
                             <Star className="w-4 h-4 text-yellow-400 fill-current" />
                             <span className="text-sm text-gray-600 ml-1">
-                              {product.seller.averageRating.toFixed(1)}
+                              {product.seller?.averageRating?.toFixed(1) || '0.0'}
                             </span>
                           </div>
                           <span className="text-sm text-gray-400">

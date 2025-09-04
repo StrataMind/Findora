@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
       }, { status: 500 })
     }
 
-    // Get fresh user data from database
+    // Get fresh user data from database with seller profile
     console.log('Fetching user status for:', session.user.email)
     const user = await db.user.findUnique({
       where: { email: session.user.email },
@@ -42,7 +42,14 @@ export async function GET(request: NextRequest) {
         canModerateContent: true,
         canViewAnalytics: true,
         canManageUsers: true,
-        canFeatureProducts: true
+        canFeatureProducts: true,
+        sellerProfile: {
+          select: {
+            id: true,
+            verificationStatus: true,
+            isOfficial: true
+          }
+        }
       }
     })
     
@@ -53,18 +60,18 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-      user: {
-        id: user.id,
-        role: user.role,
-        isSuperuser: user.isSuperuser,
-        superuserLevel: user.superuserLevel,
-        permissions: {
-          canCreateProducts: user.canCreateProducts,
-          canModerateContent: user.canModerateContent,
-          canViewAnalytics: user.canViewAnalytics,
-          canManageUsers: user.canManageUsers,
-          canFeatureProducts: user.canFeatureProducts
-        }
+      id: user.id,
+      role: user.role,
+      isSuperuser: user.isSuperuser,
+      superuserLevel: user.superuserLevel,
+      isVerifiedSeller: user.sellerProfile?.verificationStatus === 'VERIFIED',
+      sellerProfile: user.sellerProfile,
+      permissions: {
+        canCreateProducts: user.canCreateProducts,
+        canModerateContent: user.canModerateContent,
+        canViewAnalytics: user.canViewAnalytics,
+        canManageUsers: user.canManageUsers,
+        canFeatureProducts: user.canFeatureProducts
       }
     })
 

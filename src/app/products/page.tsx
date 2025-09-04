@@ -17,6 +17,7 @@ import {
   Package
 } from 'lucide-react'
 import BackButton from '@/components/ui/back-button'
+import { SmartCreateButton } from '@/components/products/smart-create-button'
 
 interface Product {
   id: string
@@ -126,8 +127,13 @@ function ProductsContent() {
         {/* Header */}
         <div className="mb-8">
           <BackButton href="/" label="Back to Home" />
-          <h1 className="text-3xl font-bold text-gray-900 mt-4">Products</h1>
-          <p className="text-gray-600 mt-2">Discover amazing products from verified sellers</p>
+          <div className="flex justify-between items-end mt-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Products</h1>
+              <p className="text-gray-600 mt-2">Discover amazing products from verified sellers</p>
+            </div>
+            <SmartCreateButton />
+          </div>
         </div>
 
         {/* Search and Filters */}

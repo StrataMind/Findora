@@ -1,14 +1,14 @@
 import { NextAuthOptions } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import { PrismaClient } from '@prisma/client'
-import { db } from './db'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
-// Create a separate Prisma client for NextAuth adapter
-const authDb = new PrismaClient()
+// Create a simple Prisma client for auth operations
+const authDb = new PrismaClient({
+  log: ['error'],
+})
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -55,7 +55,7 @@ export const authOptions: NextAuthOptions = {
 
         const { email, password } = validatedFields.data
 
-        const user = await db.user.findUnique({
+        const user = await authDb.user.findUnique({
           where: { email },
         })
 

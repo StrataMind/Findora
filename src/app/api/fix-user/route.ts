@@ -3,7 +3,15 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/db'
 
+export async function GET() {
+  return await handleUserFix()
+}
+
 export async function POST() {
+  return await handleUserFix()
+}
+
+async function handleUserFix() {
   try {
     const session = await getServerSession(authOptions)
     

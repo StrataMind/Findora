@@ -33,7 +33,12 @@ export default async function SuperuserPage() {
     }
   })
 
+  console.log('Superuser page - session user ID:', session.user.id)
+  console.log('Superuser page - user lookup result:', user)
+  console.log('Superuser page - user.isSuperuser:', user?.isSuperuser)
+
   if (!user || !user.isSuperuser) {
+    console.log('Superuser page - redirecting to dashboard, user:', user)
     redirect('/dashboard')
   }
 

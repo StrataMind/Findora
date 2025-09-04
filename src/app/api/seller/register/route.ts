@@ -66,11 +66,17 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
+    console.log('Seller registration request body:', JSON.stringify(body, null, 2))
     const validatedFields = sellerRegistrationSchema.safeParse(body)
 
     if (!validatedFields.success) {
+      console.log('Validation failed:', validatedFields.error.flatten())
       return NextResponse.json(
-        { message: 'Invalid input', errors: validatedFields.error.flatten() },
+        { 
+          message: 'Invalid input', 
+          errors: validatedFields.error.flatten(),
+          fieldErrors: validatedFields.error.errors
+        },
         { status: 400 }
       )
     }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { useCart, useCartItem } from '@/contexts/cart-context'
+import { useCart } from '@/contexts/cart-context'
 import QuantitySelector from '@/components/ui/quantity-selector'
 import { ShoppingCart, Check, AlertTriangle, Package } from 'lucide-react'
 import { toast } from 'sonner'

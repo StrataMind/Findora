@@ -8,14 +8,17 @@ function createPrismaClient() {
   const databaseUrl = process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL
   
   if (!databaseUrl) {
-    console.error('No database URL found!')
-    console.error('DATABASE_URL:', !!process.env.DATABASE_URL)
-    console.error('POSTGRES_PRISMA_URL:', !!process.env.POSTGRES_PRISMA_URL)
-    console.error('POSTGRES_URL:', !!process.env.POSTGRES_URL)
+    // Only log boolean existence, never actual URLs or connection strings
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Database configuration missing')
+    }
     throw new Error('DATABASE_URL must be set')
   }
 
-  console.log('Creating Prisma client with database URL:', databaseUrl.substring(0, 50) + '...')
+  // Safe logging in development only
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Initializing database connection...')
+  }
   
   return new PrismaClient({
     datasources: {

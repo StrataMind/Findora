@@ -3,40 +3,45 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/db'
 
+// SECURITY: This endpoint is disabled for security reasons
+// CEO privileges should only be granted through proper admin channels
 export async function GET() {
+  return NextResponse.json({ 
+    error: 'Endpoint disabled for security reasons. Contact system administrator.' 
+  }, { status: 403 })
+}
+
+// Secure function for admin use only - requires proper authentication
+async function secureCreateCEO(requestingUserId: string, targetUserEmail: string) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'No session found' }, { status: 401 })
+    // Verify the requesting user is already a CEO/ADMIN
+    const requestingUser = await db.user.findUnique({
+      where: { id: requestingUserId },
+      select: { role: true, isSuperuser: true }
+    })
+
+    if (!requestingUser?.isSuperuser || requestingUser.role !== 'CEO') {
+      throw new Error('Insufficient privileges to create CEO')
     }
 
-    console.log('Making CEO - Session:', session.user)
+    // Find target user
+    const targetUser = await db.user.findUnique({
+      where: { email: targetUserEmail }
+    })
 
-    // Create or update user as CEO
-    const user = await db.user.upsert({
-      where: { id: session.user.id },
-      update: {
-        email: session.user.email,
-        name: session.user.name || 'CEO',
+    if (!targetUser) {
+      throw new Error('Target user not found')
+    }
+
+    // Update target user to CEO with proper audit trail
+    const user = await db.user.update({
+      where: { id: targetUser.id },
+      data: {
         role: 'CEO',
         isSuperuser: true,
         superuserLevel: 'CEO',
         superuserSince: new Date(),
-        canCreateProducts: true,
-        canModerateContent: true,
-        canViewAnalytics: true,
-        canManageUsers: true,
-        canFeatureProducts: true
-      },
-      create: {
-        id: session.user.id,
-        email: session.user.email,
-        name: session.user.name || 'CEO',
-        role: 'CEO',
-        isSuperuser: true,
-        superuserLevel: 'CEO',
-        superuserSince: new Date(),
+        grantedBy: requestingUserId,
         canCreateProducts: true,
         canModerateContent: true,
         canViewAnalytics: true,
@@ -45,64 +50,34 @@ export async function GET() {
       }
     })
 
-    // Create official seller profile
-    const sellerProfile = await db.sellerProfile.upsert({
-      where: { userId: user.id },
-      update: {
-        verificationStatus: 'VERIFIED',
-        isOfficial: true,
-        accountType: 'OFFICIAL',
-        autoVerified: true,
-        verifiedAt: new Date()
-      },
-      create: {
-        userId: user.id,
-        businessName: `${user.name || 'CEO'} - Findora Official`,
-        businessType: 'CORPORATION',
-        verificationStatus: 'VERIFIED',
-        isOfficial: true,
-        accountType: 'OFFICIAL',
-        autoVerified: true,
-        description: 'Official Findora CEO store',
-        businessEmail: user.email,
-        phone: '+91-9999999999',
-        addressLine1: 'Findora HQ',
-        city: 'Mangalore',
-        state: 'Karnataka',
-        country: 'India',
-        postalCode: '575001',
-        taxId: 'CEO_OFFICIAL',
-        businessLicense: 'OFFICIAL_CEO',
-        contactPersonName: user.name || 'CEO',
-        termsAccepted: true,
-        termsAcceptedAt: new Date(),
-        verifiedAt: new Date(),
-        productCategories: ['all']
+    // Log the privilege escalation for audit
+    await db.superuserActivity.create({
+      data: {
+        userId: requestingUserId,
+        action: 'GRANT_CEO_PRIVILEGES',
+        target: targetUser.id,
+        details: {
+          targetEmail: targetUserEmail,
+          timestamp: new Date().toISOString(),
+          reason: 'Manual CEO privilege grant'
+        }
       }
     })
 
-    return NextResponse.json({
-      message: 'Successfully created CEO user and seller profile',
+    return {
+      success: true,
+      message: 'CEO privileges granted successfully',
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
-        role: user.role,
-        isSuperuser: user.isSuperuser
-      },
-      sellerProfile: {
-        id: sellerProfile.id,
-        businessName: sellerProfile.businessName,
-        verificationStatus: sellerProfile.verificationStatus,
-        isOfficial: sellerProfile.isOfficial
+        role: user.role
       }
-    })
+    }
 
   } catch (error) {
-    console.error('Error creating CEO:', error)
-    return NextResponse.json({
-      error: 'Failed to create CEO',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 })
+    throw new Error(`Failed to grant CEO privileges: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }
+
+// This function is kept for internal use only and is not exported as an API endpoint

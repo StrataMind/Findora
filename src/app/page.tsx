@@ -172,39 +172,123 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-800 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950 relative overflow-hidden">
       <Header />
-      {/* Starry background */}
+      
+      {/* Enhanced Civil Dusk Background with Cosmic Atmosphere */}
       <div className="absolute inset-0 overflow-hidden">
-        {[...Array(100)].map((_, i) => {
+        {/* Primary cosmic gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900/80 via-indigo-950/70 to-purple-950/80"></div>
+        
+        {/* Civil dusk horizon gradient */}
+        <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-amber-900/20 via-orange-800/10 to-transparent"></div>
+        
+        {/* Atmospheric nebula effects */}
+        <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-br from-amber-500/10 to-orange-500/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-40 right-32 w-80 h-80 bg-gradient-to-br from-purple-500/8 to-indigo-500/4 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute bottom-32 left-1/3 w-64 h-64 bg-gradient-to-br from-orange-400/6 to-red-400/3 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '4s' }}></div>
+        
+        {/* Enhanced starfield with varied sizes and colors */}
+        {[...Array(150)].map((_, i) => {
           // Use deterministic positioning based on index
           const seed1 = (i * 7919) % 10000 // Prime number for better distribution
           const seed2 = (i * 6151) % 10000 // Another prime number
           const top = (seed1 / 100).toFixed(2)
           const left = (seed2 / 100).toFixed(2)
-          const duration = 2 + ((i * 31) % 300) / 100 // Deterministic duration between 2-5s
-          const delay = ((i * 17) % 200) / 100 // Deterministic delay 0-2s
+          const duration = 1.5 + ((i * 31) % 400) / 100 // Deterministic duration between 1.5-5.5s
+          const delay = ((i * 17) % 600) / 100 // Deterministic delay 0-6s
+          
+          // Determine star type and properties
+          const starType = i % 8
+          let starClass = ''
+          let starSize = ''
+          
+          if (starType === 0) {
+            // Bright amber stars (civil dusk theme)
+            starClass = 'bg-amber-300'
+            starSize = 'w-1.5 h-1.5'
+          } else if (starType === 1) {
+            // Golden stars
+            starClass = 'bg-yellow-200'
+            starSize = 'w-1 h-1'
+          } else if (starType === 2) {
+            // Warm white stars
+            starClass = 'bg-orange-100'
+            starSize = 'w-0.5 h-0.5'
+          } else if (starType === 3) {
+            // Blue-white stars
+            starClass = 'bg-blue-100'
+            starSize = 'w-0.5 h-0.5'
+          } else if (starType === 4) {
+            // Tiny distant stars
+            starClass = 'bg-slate-200'
+            starSize = 'w-px h-px'
+          } else if (starType === 5) {
+            // Purple distant stars
+            starClass = 'bg-purple-200'
+            starSize = 'w-px h-px'
+          } else if (starType === 6) {
+            // Medium warm stars
+            starClass = 'bg-amber-200'
+            starSize = 'w-0.5 h-0.5'
+          } else {
+            // Standard white stars
+            starClass = 'bg-white'
+            starSize = 'w-px h-px'
+          }
           
           return (
             <motion.div
               key={i}
-              className={`absolute rounded-full ${
-                i % 3 === 0 ? 'w-1 h-1 bg-yellow-200' : 
-                i % 3 === 1 ? 'w-0.5 h-0.5 bg-blue-200' : 
-                'w-px h-px bg-white'
-              }`}
+              className={`absolute rounded-full ${starSize} ${starClass} shadow-sm`}
               style={{
                 top: `${top}%`,
                 left: `${left}%`,
+                boxShadow: starType <= 2 ? `0 0 ${starType + 2}px currentColor` : 'none'
               }}
               animate={{
-                opacity: [0.3, 1, 0.3],
-                scale: [0.8, 1.2, 0.8],
+                opacity: [0.2, 1, 0.2],
+                scale: starType <= 2 ? [0.8, 1.3, 0.8] : [0.9, 1.1, 0.9],
               }}
               transition={{
                 duration,
                 repeat: Infinity,
                 delay,
+              }}
+            />
+          )
+        })}
+        
+        {/* Shooting stars effect */}
+        {[...Array(3)].map((_, i) => {
+          const shootingDelay = i * 15 + 5 // 5s, 20s, 35s intervals
+          const startX = ((i + 1) * 2347) % 100 // Deterministic start position
+          
+          return (
+            <motion.div
+              key={`shooting-${i}`}
+              className="absolute w-1 h-1 bg-gradient-to-r from-amber-300 to-transparent rounded-full"
+              style={{
+                top: `${10 + i * 20}%`,
+                left: `${startX}%`
+              }}
+              initial={{ 
+                opacity: 0,
+                x: 0,
+                y: 0,
+                scale: 0.5
+              }}
+              animate={{
+                opacity: [0, 1, 0],
+                x: [-200, 200],
+                y: [0, 100],
+                scale: [0.5, 1, 0.3]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                delay: shootingDelay,
+                ease: "easeOut"
               }}
             />
           )

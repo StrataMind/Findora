@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Heart, ShoppingCart, Eye, Star, Zap, Shield, TrendingUp, Share2, GitCompare, Gift } from 'lucide-react'
+import { Heart, ShoppingCart, Eye, Star, Zap, Shield, TrendingUp, Share2, RotateCcw, Gift } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
@@ -144,7 +144,7 @@ export function AdvancedProductCard({
             className="w-10 h-10 rounded-full bg-white/90 hover:bg-white text-gray-600 hover:text-purple-600 shadow-lg backdrop-blur-sm"
             onClick={() => onCompare?.(product.id)}
           >
-            <GitCompare className="w-4 h-4" />
+            <RotateCcw className="w-4 h-4" />
           </Button>
         </div>
 

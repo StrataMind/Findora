@@ -64,7 +64,7 @@ export default function SellersPage() {
   )
 
   const formatRating = (rating: number) => {
-    return rating ? rating.toFixed(1) : '0.0'
+    return (rating && rating > 0) ? rating.toFixed(1) : '0.0'
   }
 
   const renderStars = (rating: number) => (
@@ -79,31 +79,57 @@ export default function SellersPage() {
   )
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-800">
+      {/* Enhanced Header */}
+      <div className="bg-slate-800/80 backdrop-blur-xl shadow-lg border-b border-slate-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-8">
             {/* Back Button */}
-            <div className="mb-6">
+            <motion.div 
+              className="mb-6"
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
               <Link href="/">
-                <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" className="flex items-center gap-2 hover:bg-slate-700 hover:text-amber-400 text-slate-300 transition-all duration-300 rounded-xl">
                   <ArrowLeft className="h-4 w-4" />
                   Back to Home
                 </Button>
               </Link>
-            </div>
+            </motion.div>
             
-            <div className="flex items-center justify-between">
+            <motion.div 
+              className="flex items-center justify-between"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Sellers</h1>
-                <p className="text-gray-600 mt-2">Discover verified sellers and their products</p>
+                <h1 className="text-4xl lg:text-5xl font-bold mb-3">
+                  <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+                    Sellers
+                  </span>
+                </h1>
+                <p className="text-xl text-slate-300 max-w-2xl">
+                  Discover verified sellers and their premium products from around the world
+                </p>
               </div>
-              <div className="flex items-center space-x-2">
+              <motion.div 
+                className="flex items-center space-x-2"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
                 <Button
                   variant={viewMode === 'grid' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setViewMode('grid')}
+                  className={`rounded-xl transition-all duration-300 ${
+                    viewMode === 'grid' 
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg' 
+                      : 'hover:bg-slate-700 hover:border-amber-400 text-slate-300'
+                  }`}
                 >
                   <Grid3X3 className="h-4 w-4" />
                 </Button>
@@ -111,33 +137,43 @@ export default function SellersPage() {
                   variant={viewMode === 'list' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setViewMode('list')}
+                  className={`rounded-xl transition-all duration-300 ${
+                    viewMode === 'list' 
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg' 
+                      : 'hover:bg-slate-700 hover:border-amber-400 text-slate-300'
+                  }`}
                 >
                   <List className="h-4 w-4" />
                 </Button>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Filters */}
-        <div className="mb-8 flex flex-col sm:flex-row gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
+        {/* Enhanced Filters */}
+        <motion.div 
+          className="mb-12 flex flex-col sm:flex-row gap-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
           <div className="flex-1 max-w-md relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 h-5 w-5" />
             <Input
               placeholder="Search sellers..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-12 pr-4 py-3 rounded-xl border-slate-600 bg-slate-700/70 backdrop-blur-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-400/20 transition-all duration-300 shadow-sm hover:shadow-md text-white placeholder-slate-400"
             />
           </div>
           
-          <div className="sm:w-48">
+          <div className="sm:w-52">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-xl border border-slate-600 bg-slate-700/70 backdrop-blur-sm px-4 py-3 text-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-400/20 transition-all duration-300 shadow-sm hover:shadow-md text-slate-300"
             >
               <option value="averageRating:desc">Highest Rated</option>
               <option value="totalSales:desc">Most Sales</option>
@@ -145,34 +181,48 @@ export default function SellersPage() {
               <option value="businessName:asc">Name A-Z</option>
             </select>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <Shield className="h-6 w-6 text-blue-600" />
+        {/* Enhanced Stats */}
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.4 }}
+        >
+          <motion.div 
+            className="bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl p-8 text-center transition-all duration-500 border border-slate-700 hover:border-amber-400 group"
+            whileHover={{ scale: 1.02, y: -5 }}
+          >
+            <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+              <Shield className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">Verified Sellers</h3>
-            <p className="text-gray-600 text-sm">All sellers are verified for quality and authenticity</p>
-          </div>
+            <h3 className="text-xl font-bold text-slate-100 mb-2">Verified Sellers</h3>
+            <p className="text-slate-300">All sellers are verified for quality and authenticity</p>
+          </motion.div>
           
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <Award className="h-6 w-6 text-green-600" />
+          <motion.div 
+            className="bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl p-8 text-center transition-all duration-500 border border-slate-700 hover:border-orange-400 group"
+            whileHover={{ scale: 1.02, y: -5 }}
+          >
+            <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+              <Award className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">Top Rated</h3>
-            <p className="text-gray-600 text-sm">4.5+ average rating from customer reviews</p>
-          </div>
+            <h3 className="text-xl font-bold text-slate-100 mb-2">Top Rated</h3>
+            <p className="text-slate-300">4.5+ average rating from customer reviews</p>
+          </motion.div>
           
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <TrendingUp className="h-6 w-6 text-purple-600" />
+          <motion.div 
+            className="bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl p-8 text-center transition-all duration-500 border border-slate-700 hover:border-red-400 group"
+            whileHover={{ scale: 1.02, y: -5 }}
+          >
+            <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+              <TrendingUp className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">Growing Fast</h3>
-            <p className="text-gray-600 text-sm">New sellers joining our marketplace daily</p>
-          </div>
-        </div>
+            <h3 className="text-xl font-bold text-slate-100 mb-2">Growing Fast</h3>
+            <p className="text-slate-300">New sellers joining our marketplace daily</p>
+          </motion.div>
+        </motion.div>
 
         {/* Sellers Grid/List */}
         {loading ? (
@@ -181,21 +231,21 @@ export default function SellersPage() {
             : 'space-y-4'
           }>
             {[...Array(9)].map((_, index) => (
-              <div key={index} className="bg-white rounded-lg shadow animate-pulse">
+              <div key={index} className="bg-slate-800 rounded-lg shadow animate-pulse">
                 {viewMode === 'grid' ? (
                   <div className="p-6 space-y-4">
-                    <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto"></div>
+                    <div className="w-16 h-16 bg-slate-600 rounded-full mx-auto"></div>
                     <div className="space-y-2">
-                      <div className="h-4 bg-gray-200 rounded"></div>
-                      <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
+                      <div className="h-4 bg-slate-600 rounded"></div>
+                      <div className="h-4 bg-slate-600 rounded w-3/4 mx-auto"></div>
                     </div>
                   </div>
                 ) : (
                   <div className="flex items-center p-6 space-x-4">
-                    <div className="w-16 h-16 bg-gray-200 rounded-full"></div>
+                    <div className="w-16 h-16 bg-slate-600 rounded-full"></div>
                     <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-gray-200 rounded"></div>
-                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-4 bg-slate-600 rounded"></div>
+                      <div className="h-4 bg-slate-600 rounded w-3/4"></div>
                     </div>
                   </div>
                 )}
@@ -204,9 +254,9 @@ export default function SellersPage() {
           </div>
         ) : filteredSellers.length === 0 ? (
           <div className="text-center py-12">
-            <Users className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No sellers found</h3>
-            <p className="text-gray-600 mb-4">
+            <Users className="mx-auto h-12 w-12 text-slate-400 mb-4" />
+            <h3 className="text-lg font-medium text-slate-200 mb-2">No sellers found</h3>
+            <p className="text-slate-400 mb-4">
               {searchTerm ? 'No sellers match your search.' : 'No sellers available at the moment.'}
             </p>
             {searchTerm && (
@@ -227,9 +277,12 @@ export default function SellersPage() {
               >
                 <Link href={`/seller/${seller.id}`}>
                   {viewMode === 'grid' ? (
-                    <div className="bg-white rounded-lg shadow hover:shadow-lg transition-all duration-300 group">
-                      <div className="p-6 text-center">
-                        <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
+                    <div className="bg-slate-800/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 group border border-slate-700 hover:border-amber-400 overflow-hidden">
+                      <div className="p-8 text-center relative">
+                        {/* Background decoration */}
+                        <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-full -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-700"></div>
+                        
+                        <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-slate-600 to-slate-700 rounded-2xl flex items-center justify-center overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 relative z-10">
                           {seller.logo ? (
                             <img
                               src={seller.logo}
@@ -237,57 +290,66 @@ export default function SellersPage() {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <Users className="h-8 w-8 text-gray-400" />
+                            <Users className="h-10 w-10 text-slate-400" />
                           )}
                         </div>
                         
-                        <div className="flex items-center justify-center mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                        <div className="flex items-center justify-center mb-3 relative z-10">
+                          <h3 className="text-xl font-bold text-slate-100 group-hover:text-amber-400 transition-colors duration-300">
                             {seller.businessName}
                           </h3>
                           {seller.verificationStatus === 'VERIFIED' && (
-                            <Shield className="h-4 w-4 text-green-500 ml-2" />
+                            <motion.div
+                              whileHover={{ scale: 1.2, rotate: 10 }}
+                              className="ml-2"
+                            >
+                              <Shield className="h-5 w-5 text-green-500" />
+                            </motion.div>
                           )}
                         </div>
                         
                         {seller.description && (
-                          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                          <p className="text-slate-300 mb-6 line-clamp-2 leading-relaxed">
                             {seller.description}
                           </p>
                         )}
                         
-                        <div className="space-y-2 mb-4">
+                        <div className="space-y-4 mb-6 relative z-10">
                           <div className="flex items-center justify-center gap-2">
-                            {renderStars(seller.averageRating)}
-                            <span className="text-sm text-gray-600">
+                            <div className="flex items-center">
+                              {renderStars(seller.averageRating)}
+                            </div>
+                            <span className="text-sm font-semibold text-slate-800 bg-amber-200 px-2 py-1 rounded-full">
                               {formatRating(seller.averageRating)} ({seller.totalReviews})
                             </span>
                           </div>
                           
-                          <div className="flex items-center justify-between text-sm text-gray-600">
-                            <div className="flex items-center">
-                              <Package className="h-4 w-4 mr-1" />
-                              {seller.totalProducts} products
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="flex items-center justify-center bg-amber-100 rounded-xl p-3 group-hover:bg-amber-200 transition-colors duration-300">
+                              <Package className="h-4 w-4 mr-2 text-amber-700" />
+                              <span className="font-medium text-slate-800">{seller.totalProducts} products</span>
                             </div>
-                            <div>
-                              {seller.totalSales} sales
+                            <div className="flex items-center justify-center bg-orange-100 rounded-xl p-3 group-hover:bg-orange-200 transition-colors duration-300">
+                              <TrendingUp className="h-4 w-4 mr-2 text-orange-700" />
+                              <span className="font-medium text-slate-800">{seller.totalSales} sales</span>
                             </div>
                           </div>
                         </div>
                         
                         <Button 
-                          size="sm" 
-                          className="w-full group-hover:bg-blue-600 transition-colors"
+                          className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 rounded-xl py-3 font-semibold relative z-10"
                         >
-                          View Store
-                          <ArrowRight className="h-4 w-4 ml-2" />
+                          <span className="flex items-center justify-center gap-2">
+                            View Store
+                            <ArrowRight className="h-4 w-4" />
+                          </span>
                         </Button>
                       </div>
                     </div>
                   ) : (
-                    <div className="bg-white rounded-lg shadow hover:shadow-lg transition-all duration-300 group">
+                    <div className="bg-slate-800 rounded-lg shadow hover:shadow-lg transition-all duration-300 group">
                       <div className="flex items-center p-6">
-                        <div className="w-16 h-16 flex-shrink-0 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden mr-4">
+                        <div className="w-16 h-16 flex-shrink-0 bg-slate-700 rounded-full flex items-center justify-center overflow-hidden mr-4">
                           {seller.logo ? (
                             <img
                               src={seller.logo}
@@ -295,13 +357,13 @@ export default function SellersPage() {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <Users className="h-8 w-8 text-gray-400" />
+                            <Users className="h-8 w-8 text-slate-400" />
                           )}
                         </div>
                         
                         <div className="flex-1">
                           <div className="flex items-center mb-1">
-                            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                            <h3 className="text-lg font-semibold text-slate-100 group-hover:text-amber-400 transition-colors">
                               {seller.businessName}
                             </h3>
                             {seller.verificationStatus === 'VERIFIED' && (
@@ -310,12 +372,12 @@ export default function SellersPage() {
                           </div>
                           
                           {seller.description && (
-                            <p className="text-gray-600 text-sm mb-2 line-clamp-1">
+                            <p className="text-slate-300 text-sm mb-2 line-clamp-1">
                               {seller.description}
                             </p>
                           )}
                           
-                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                          <div className="flex items-center gap-4 text-sm text-slate-400">
                             <div className="flex items-center gap-1">
                               {renderStars(seller.averageRating)}
                               <span>{formatRating(seller.averageRating)}</span>
@@ -330,7 +392,7 @@ export default function SellersPage() {
                           </div>
                         </div>
                         
-                        <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                        <ArrowRight className="h-5 w-5 text-slate-400 group-hover:text-amber-400 transition-colors" />
                       </div>
                     </div>
                   )}
@@ -341,9 +403,9 @@ export default function SellersPage() {
         )}
 
         {/* Call to Action */}
-        <div className="mt-16 bg-blue-50 rounded-xl p-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Want to sell on Findora?</h2>
-          <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+        <div className="mt-16 bg-slate-800 rounded-xl p-8 text-center border border-slate-700">
+          <h2 className="text-2xl font-bold text-slate-100 mb-4">Want to sell on Findora?</h2>
+          <p className="text-slate-300 mb-6 max-w-2xl mx-auto">
             Join thousands of verified sellers and start selling your products to our growing customer base.
             Get started with our easy seller registration process.
           </p>

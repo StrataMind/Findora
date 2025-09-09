@@ -9,6 +9,11 @@ import { Button } from '@/components/ui/button'
 import { useRecommendations, Product } from '@/lib/recommendations'
 import { CartButton } from '@/components/cart/cart-button'
 import { AddToCartButton } from '@/components/cart/add-to-cart-button'
+import { StunningHero } from '@/components/modern/stunning-hero'
+import { CategoryShowcase } from '@/components/modern/category-showcase'
+import { FeaturesSection } from '@/components/modern/features-section'
+import { TestimonialsSection } from '@/components/modern/testimonials-section'
+import { AdvancedProductCard } from '@/components/modern/advanced-product-card'
 import { 
   Search, 
   Star, 
@@ -130,102 +135,97 @@ export default function Home() {
     </div>
   )
 
-  const ProductCard = ({ product }: { product: Product }) => (
-    <motion.div 
-      className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300"
-      whileHover={{ y: -4 }}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
-      <div className="relative aspect-square overflow-hidden">
-        {product.images && product.images.length > 0 ? (
-          <img
-            src={product.images[0].url}
-            alt={product.images[0].altText || product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
-        ) : (
-          <div className="w-full h-full bg-gray-50 flex items-center justify-center">
-            <Package className="h-12 w-12 text-gray-300" />
-          </div>
-        )}
-        
-        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <button className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors">
-            <Heart className="h-4 w-4 text-gray-600" />
-          </button>
-        </div>
-        
-        {product.compareAtPrice && product.compareAtPrice > product.price && (
-          <div className="absolute top-3 left-3 bg-red-500 text-white text-xs font-medium px-2 py-1 rounded-full">
-            Sale
-          </div>
-        )}
-      </div>
+  const ProductCard = ({ product }: { product: Product }) => {
+    // Transform Product to AdvancedProductCard format
+    const transformedProduct = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      originalPrice: product.compareAtPrice,
+      images: product.images?.map(img => img.url) || ['/api/placeholder/300/300'],
+      rating: product.averageRating || 4.0,
+      reviews: product.totalReviews || 0,
+      category: product.category?.name || 'General',
+      badge: product.compareAtPrice && product.compareAtPrice > product.price ? 'sale' as const : undefined,
+      discount: product.compareAtPrice && product.compareAtPrice > product.price 
+        ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100) 
+        : undefined,
+      seller: product.seller?.businessName || 'Unknown Seller',
+      freeShipping: true,
+      fastDelivery: product.id.length % 2 === 0, // Deterministic based on product ID
+      inStock: product.stock > 0,
+      stockCount: product.stock
+    }
 
-      <div className="p-5">
-        <div className="mb-3">
-          <h3 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2 group-hover:text-blue-600 transition-colors">
-            <Link href={`/products/${product.slug}`}>
-              {product.name}
-            </Link>
-          </h3>
-          <p className="text-xs text-gray-500">{product.seller?.businessName || 'Unknown Seller'}</p>
-        </div>
-
-        <div className="flex items-center gap-2 mb-3">
-          {renderStars(product.averageRating || 0)}
-          <span className="text-xs text-gray-500">({product.totalReviews || 0})</span>
-          {product.seller?.verificationStatus === 'VERIFIED' && (
-            <Shield className="h-3 w-3 text-green-500" />
-          )}
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-gray-900">
-              {formatPrice(product.price)}
-            </span>
-            {product.compareAtPrice && product.compareAtPrice > product.price && (
-              <span className="text-xs text-gray-400 line-through">
-                {formatPrice(product.compareAtPrice)}
-              </span>
-            )}
-          </div>
-          <AddToCartButton 
-            product={{
-              id: product.id,
-              name: product.name,
-              price: product.price,
-              slug: product.slug,
-              images: product.images
-            }}
-            size="sm" 
-            className="h-8 px-3 text-xs"
-          />
-        </div>
-      </div>
-    </motion.div>
-  )
+    return (
+      <AdvancedProductCard
+        product={transformedProduct}
+        variant="compact"
+        onAddToCart={(id) => console.log('Add to cart:', id)}
+        onWishlist={(id) => console.log('Add to wishlist:', id)}
+        onQuickView={(id) => console.log('Quick view:', id)}
+        onShare={(id) => console.log('Share:', id)}
+        onCompare={(id) => console.log('Compare:', id)}
+      />
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-800 relative overflow-hidden">
+      {/* Starry background */}
+      <div className="absolute inset-0 overflow-hidden">
+        {[...Array(100)].map((_, i) => {
+          // Use deterministic positioning based on index
+          const seed1 = (i * 7919) % 10000 // Prime number for better distribution
+          const seed2 = (i * 6151) % 10000 // Another prime number
+          const top = (seed1 / 100).toFixed(2)
+          const left = (seed2 / 100).toFixed(2)
+          const duration = 2 + ((i * 31) % 300) / 100 // Deterministic duration between 2-5s
+          const delay = ((i * 17) % 200) / 100 // Deterministic delay 0-2s
+          
+          return (
+            <motion.div
+              key={i}
+              className={`absolute rounded-full ${
+                i % 3 === 0 ? 'w-1 h-1 bg-yellow-200' : 
+                i % 3 === 1 ? 'w-0.5 h-0.5 bg-blue-200' : 
+                'w-px h-px bg-white'
+              }`}
+              style={{
+                top: `${top}%`,
+                left: `${left}%`,
+              }}
+              animate={{
+                opacity: [0.3, 1, 0.3],
+                scale: [0.8, 1.2, 0.8],
+              }}
+              transition={{
+                duration,
+                repeat: Infinity,
+                delay,
+              }}
+            />
+          )
+        })}
+      </div>
+      {/* Enhanced Navigation */}
+      <nav className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-xl border-b border-slate-700 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">Findora</h1>
+            <Link href="/" className="flex items-center group">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent group-hover:from-amber-300 group-hover:to-orange-400 transition-all duration-300">
+                Findora
+              </h1>
             </Link>
             
             <div className="hidden md:flex items-center space-x-8">
-              <Link href="/products" className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">
+              <Link href="/products" className="text-sm font-medium text-slate-300 hover:text-amber-400 transition-all duration-300 hover:scale-105 relative after:absolute after:w-0 after:h-0.5 after:bg-amber-400 after:left-0 after:-bottom-1 hover:after:w-full after:transition-all after:duration-300">
                 Products
               </Link>
-              <Link href="/categories" className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">
+              <Link href="/categories" className="text-sm font-medium text-slate-300 hover:text-amber-400 transition-all duration-300 hover:scale-105 relative after:absolute after:w-0 after:h-0.5 after:bg-amber-400 after:left-0 after:-bottom-1 hover:after:w-full after:transition-all after:duration-300">
                 Categories
               </Link>
-              <Link href="/sellers" className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">
+              <Link href="/sellers" className="text-sm font-medium text-slate-300 hover:text-amber-400 transition-all duration-300 hover:scale-105 relative after:absolute after:w-0 after:h-0.5 after:bg-amber-400 after:left-0 after:-bottom-1 hover:after:w-full after:transition-all after:duration-300">
                 Sellers
               </Link>
             </div>
@@ -233,26 +233,32 @@ export default function Home() {
             <div className="flex items-center space-x-4">
               {status === 'loading' ? (
                 <div className="flex items-center space-x-3">
-                  <div className="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
-                  <div className="h-8 w-20 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-8 w-16 bg-gradient-to-r from-slate-700 to-slate-600 rounded-xl animate-pulse"></div>
+                  <div className="h-8 w-20 bg-gradient-to-r from-slate-700 to-slate-600 rounded-xl animate-pulse"></div>
                 </div>
               ) : session ? (
                 <>
-                  <span className="text-sm text-gray-600 hidden sm:block">
+                  <span className="text-sm text-slate-300 hidden sm:block font-medium">
                     {session.user?.name || session.user?.email}
                   </span>
                   <CartButton />
                   <Link href="/dashboard">
-                    <Button size="sm">Dashboard</Button>
+                    <Button size="sm" className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                      Dashboard
+                    </Button>
                   </Link>
                 </>
               ) : (
                 <>
                   <Link href="/auth/signin">
-                    <Button variant="ghost" size="sm">Sign In</Button>
+                    <Button variant="ghost" size="sm" className="hover:bg-slate-800 hover:text-amber-400 text-slate-300 transition-all duration-300">
+                      Sign In
+                    </Button>
                   </Link>
                   <Link href="/auth/signup">
-                    <Button size="sm">Sign Up</Button>
+                    <Button size="sm" className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                      Sign Up
+                    </Button>
                   </Link>
                 </>
               )}
@@ -262,234 +268,206 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative py-20 lg:py-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-4xl mx-auto">
-            <motion.h1 
-              className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              Discover Amazing
-              <span className="block text-blue-600">Products</span>
-            </motion.h1>
-            
-            <motion.p 
-              className="text-lg md:text-xl text-gray-600 mb-10 leading-relaxed"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-            >
-              Shop from verified sellers and discover quality products 
-              with seamless shopping experience.
-            </motion.p>
-
-            {/* Search Bar */}
-            <motion.div 
-              className="max-w-2xl mx-auto mb-12"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search for products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-32 py-4 text-lg border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                <Button className="absolute right-2 top-1/2 transform -translate-y-1/2 px-6">
-                  Search
-                </Button>
-              </div>
-            </motion.div>
-
-            {/* Stats */}
-            <motion.div 
-              className="grid grid-cols-3 gap-8 max-w-2xl mx-auto"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">10K+</div>
-                <div className="text-sm text-gray-600">Products</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">500+</div>
-                <div className="text-sm text-gray-600">Sellers</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">4.9★</div>
-                <div className="text-sm text-gray-600">Rating</div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
+      <StunningHero />
 
       {/* Features */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <motion.div 
-              className="text-center p-6"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Shield className="h-6 w-6 text-blue-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Verified Sellers</h3>
-              <p className="text-gray-600">All sellers are verified for quality and authenticity</p>
-            </motion.div>
-            
-            <motion.div 
-              className="text-center p-6"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <Truck className="h-6 w-6 text-green-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Fast Delivery</h3>
-              <p className="text-gray-600">Quick and reliable delivery to your doorstep</p>
-            </motion.div>
-            
-            <motion.div 
-              className="text-center p-6"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="h-6 w-6 text-purple-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Quality Guarantee</h3>
-              <p className="text-gray-600">100% satisfaction guarantee on all purchases</p>
-            </motion.div>
-          </div>
-        </div>
-      </section>
+      <FeaturesSection />
 
-      {/* Featured Products */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-12">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Featured Products</h2>
-              <p className="text-gray-600">Handpicked products just for you</p>
+      {/* Enhanced Featured Products Section */}
+      <section className="py-20 bg-gradient-to-br from-slate-800 via-slate-900 to-indigo-900 relative overflow-hidden">
+        {/* Background decorations */}
+        <div className="absolute top-10 left-10 w-72 h-72 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-gradient-to-br from-orange-400/10 to-red-400/10 rounded-full blur-3xl"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div 
+            className="flex items-center justify-between mb-12"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="text-center lg:text-left">
+              <h2 className="text-4xl lg:text-5xl font-bold mb-4">
+                <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+                  Featured Products
+                </span>
+              </h2>
+              <p className="text-xl text-slate-300 max-w-2xl">
+                Discover our handpicked collection of premium products with exclusive deals
+              </p>
             </div>
             <Link href="/products">
-              <Button variant="outline" className="flex items-center gap-2">
-                View All
-                <ArrowRight className="h-4 w-4" />
+              <Button className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 px-6 py-3 rounded-xl">
+                <span className="flex items-center gap-2 font-semibold">
+                  View All
+                  <ArrowRight className="h-5 w-5" />
+                </span>
               </Button>
             </Link>
-          </div>
+          </motion.div>
           
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {[...Array(8)].map((_, i) => (
-                <div key={i} className="bg-gray-200 rounded-2xl aspect-square animate-pulse"></div>
+                <motion.div 
+                  key={i} 
+                  className="bg-white rounded-2xl p-6 shadow-lg"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                >
+                  <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl mb-4 animate-pulse"></div>
+                  <div className="space-y-3">
+                    <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-300 rounded-lg animate-pulse"></div>
+                    <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-300 rounded-lg w-3/4 animate-pulse"></div>
+                    <div className="h-6 bg-gradient-to-r from-amber-200 to-orange-200 rounded-lg w-1/2 animate-pulse"></div>
+                  </div>
+                </motion.div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredProducts.slice(0, 8).map((product) => (
-                <ProductCard key={product.id} product={product} />
+            <motion.div 
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              {featuredProducts.slice(0, 8).map((product, index) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  className="group"
+                >
+                  <div className="bg-slate-800 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-700 hover:border-amber-400 group-hover:-translate-y-2">
+                    <ProductCard product={product} />
+                  </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </div>
       </section>
 
       {/* Categories */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Shop by Category</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Explore our wide range of categories and find exactly what you're looking for
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {categories.slice(0, 6).map((category, index) => (
-              <motion.div
-                key={category.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <Link href={`/categories/${category.slug}`}>
-                  <div className="bg-white rounded-2xl p-6 text-center hover:shadow-lg transition-all duration-300 group">
-                    <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-100 transition-colors">
-                      <Package className="h-6 w-6 text-gray-600 group-hover:text-blue-600" />
-                    </div>
-                    <h3 className="font-medium text-gray-900 text-sm mb-1">{category.name}</h3>
-                    <p className="text-xs text-gray-500">{category._count.products} items</p>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <CategoryShowcase />
 
-      {/* Trending Products */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-12">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-                <TrendingUp className="h-8 w-8 text-orange-500" />
-                Trending Now
+      {/* Enhanced Trending Products Section */}
+      <section className="py-20 bg-gradient-to-br from-indigo-950 via-slate-900 to-purple-950 relative overflow-hidden">
+        {/* Background decorations */}
+        <div className="absolute top-16 right-16 w-80 h-80 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-16 left-16 w-64 h-64 bg-gradient-to-br from-yellow-400/10 to-amber-400/10 rounded-full blur-3xl"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div 
+            className="flex items-center justify-between mb-12"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="text-center lg:text-left">
+              <h2 className="text-4xl lg:text-5xl font-bold mb-4 flex items-center gap-4">
+                <motion.div 
+                  className="p-3 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl shadow-lg"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <TrendingUp className="h-8 w-8 text-white" />
+                </motion.div>
+                <span className="bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+                  Trending Now
+                </span>
               </h2>
-              <p className="text-gray-600">Most popular products this week</p>
+              <p className="text-xl text-slate-300 max-w-2xl">
+                Discover what's hot right now - most popular products this week
+              </p>
             </div>
             <Link href="/products?sort=trending">
-              <Button variant="outline" className="flex items-center gap-2">
-                View All
-                <ArrowRight className="h-4 w-4" />
+              <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 px-6 py-3 rounded-xl">
+                <span className="flex items-center gap-2 font-semibold">
+                  View All
+                  <ArrowRight className="h-5 w-5" />
+                </span>
               </Button>
             </Link>
-          </div>
+          </motion.div>
           
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {[...Array(8)].map((_, i) => (
-                <div key={i} className="bg-gray-200 rounded-2xl aspect-square animate-pulse"></div>
+                <motion.div 
+                  key={i} 
+                  className="bg-slate-800 rounded-2xl p-6 shadow-lg border border-slate-700"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                >
+                  <div className="aspect-square bg-gradient-to-br from-orange-200 to-red-200 rounded-xl mb-4 animate-pulse"></div>
+                  <div className="space-y-3">
+                    <div className="h-4 bg-gradient-to-r from-amber-400/20 to-orange-400/20 rounded-lg animate-pulse"></div>
+                    <div className="h-4 bg-gradient-to-r from-amber-400/20 to-orange-400/20 rounded-lg w-3/4 animate-pulse"></div>
+                    <div className="h-6 bg-gradient-to-r from-amber-400/30 to-orange-400/30 rounded-lg w-1/2 animate-pulse"></div>
+                  </div>
+                </motion.div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {trendingProducts.slice(0, 8).map((product) => (
-                <ProductCard key={product.id} product={product} />
+            <motion.div 
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              {trendingProducts.slice(0, 8).map((product, index) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  className="group"
+                >
+                  <div className="bg-slate-800 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-700 hover:border-amber-400 group-hover:-translate-y-2 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-amber-400/10 to-orange-400/10 rounded-full -translate-y-8 translate-x-8"></div>
+                    <ProductCard product={product} />
+                  </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+      {/* Testimonials */}
+      <TestimonialsSection />
+
+      {/* Enhanced Footer */}
+      <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-16 relative overflow-hidden">
+        {/* Background decorations */}
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent"></div>
+        <div className="absolute top-8 right-8 w-32 h-32 bg-gradient-to-br from-amber-600/10 to-orange-600/10 rounded-full blur-2xl"></div>
+        <div className="absolute bottom-8 left-8 w-48 h-48 bg-gradient-to-br from-orange-600/10 to-red-600/10 rounded-full blur-3xl"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
             <div>
-              <h3 className="text-xl font-bold mb-4">Findora</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">
-                Your trusted marketplace for quality products from verified sellers.
+              <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">
+                Findora
+              </h3>
+              <p className="text-gray-300 text-sm leading-relaxed mb-4">
+                Your trusted marketplace for quality products from verified sellers worldwide.
               </p>
+              <div className="flex space-x-3">
+                {['facebook', 'twitter', 'instagram', 'linkedin'].map((social) => (
+                  <a
+                    key={social}
+                    href="#"
+                    className="w-10 h-10 bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl flex items-center justify-center hover:from-amber-500 hover:to-orange-600 transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                  >
+                    <span className="text-sm font-semibold capitalize">{social[0]}</span>
+                  </a>
+                ))}
+              </div>
             </div>
             
             <div>

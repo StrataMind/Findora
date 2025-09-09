@@ -210,64 +210,6 @@ export default function Home() {
           )
         })}
       </div>
-      {/* Enhanced Navigation */}
-      <nav className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-xl border-b border-slate-700 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center group">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent group-hover:from-amber-300 group-hover:to-orange-400 transition-all duration-300">
-                Findora
-              </h1>
-            </Link>
-            
-            <div className="hidden md:flex items-center space-x-8">
-              <Link href="/products" className="text-sm font-medium text-slate-300 hover:text-amber-400 transition-all duration-300 hover:scale-105 relative after:absolute after:w-0 after:h-0.5 after:bg-amber-400 after:left-0 after:-bottom-1 hover:after:w-full after:transition-all after:duration-300">
-                Products
-              </Link>
-              <Link href="/categories" className="text-sm font-medium text-slate-300 hover:text-amber-400 transition-all duration-300 hover:scale-105 relative after:absolute after:w-0 after:h-0.5 after:bg-amber-400 after:left-0 after:-bottom-1 hover:after:w-full after:transition-all after:duration-300">
-                Categories
-              </Link>
-              <Link href="/sellers" className="text-sm font-medium text-slate-300 hover:text-amber-400 transition-all duration-300 hover:scale-105 relative after:absolute after:w-0 after:h-0.5 after:bg-amber-400 after:left-0 after:-bottom-1 hover:after:w-full after:transition-all after:duration-300">
-                Sellers
-              </Link>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              {status === 'loading' ? (
-                <div className="flex items-center space-x-3">
-                  <div className="h-8 w-16 bg-gradient-to-r from-slate-700 to-slate-600 rounded-xl animate-pulse"></div>
-                  <div className="h-8 w-20 bg-gradient-to-r from-slate-700 to-slate-600 rounded-xl animate-pulse"></div>
-                </div>
-              ) : session ? (
-                <>
-                  <span className="text-sm text-slate-300 hidden sm:block font-medium">
-                    {session.user?.name || session.user?.email}
-                  </span>
-                  <CartButton />
-                  <Link href="/dashboard">
-                    <Button size="sm" className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                      Dashboard
-                    </Button>
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link href="/auth/signin">
-                    <Button variant="ghost" size="sm" className="hover:bg-slate-800 hover:text-amber-400 text-slate-300 transition-all duration-300">
-                      Sign In
-                    </Button>
-                  </Link>
-                  <Link href="/auth/signup">
-                    <Button size="sm" className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                      Sign Up
-                    </Button>
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </nav>
 
       {/* Hero Section */}
       <StunningHero />

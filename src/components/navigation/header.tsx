@@ -19,7 +19,9 @@ import {
   Settings,
   LogOut,
   Heart,
-  Bell
+  Bell,
+  Tag,
+  TrendingUp
 } from 'lucide-react'
 
 export default function Header() {
@@ -30,12 +32,56 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('')
   const [notificationCount, setNotificationCount] = useState(3) // Mock notification count
   const [showNotifications, setShowNotifications] = useState(false)
+  const [searchSuggestions, setSearchSuggestions] = useState<Array<{
+    id: string
+    title: string
+    type: 'category' | 'product' | 'popular'
+    category?: string
+  }>>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+
+  // Mock search suggestions - in production, this would come from your API
+  const mockSuggestions = [
+    { id: '1', title: 'Smartphones', type: 'category' as const },
+    { id: '2', title: 'Laptops', type: 'category' as const },
+    { id: '3', title: 'Gaming Headsets', type: 'category' as const },
+    { id: '4', title: 'iPhone 15 Pro', type: 'product' as const, category: 'Electronics' },
+    { id: '5', title: 'MacBook Air M2', type: 'product' as const, category: 'Electronics' },
+    { id: '6', title: 'Sony WH-1000XM5', type: 'product' as const, category: 'Audio' },
+    { id: '7', title: 'Wireless earbuds', type: 'popular' as const },
+    { id: '8', title: 'Smart watches', type: 'popular' as const },
+  ]
+
+  useEffect(() => {
+    if (searchQuery.trim().length > 0) {
+      const filtered = mockSuggestions.filter(item =>
+        item.title.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      setSearchSuggestions(filtered)
+      setShowSuggestions(true)
+    } else {
+      setSearchSuggestions([])
+      setShowSuggestions(false)
+    }
+  }, [searchQuery])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
       router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`)
       setSearchQuery('')
+      setShowSuggestions(false)
+    }
+  }
+
+  const handleSuggestionClick = (suggestion: typeof searchSuggestions[0]) => {
+    setSearchQuery(suggestion.title)
+    setShowSuggestions(false)
+    
+    if (suggestion.type === 'category') {
+      router.push(`/categories?filter=${encodeURIComponent(suggestion.title)}`)
+    } else {
+      router.push(`/products?search=${encodeURIComponent(suggestion.title)}`)
     }
   }
 
@@ -68,19 +114,69 @@ export default function Header() {
             </Link>
           </motion.div>
 
-          {/* Search Bar */}
-          <div className="flex-1 max-w-2xl mx-8 hidden md:block">
+          {/* Enhanced Search Bar with Autocomplete */}
+          <div className="flex-1 max-w-2xl mx-8 hidden md:block relative">
             <form onSubmit={handleSearch} className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-amber-400" />
               </div>
               <Input
                 type="text"
-                placeholder="Search products..."
+                placeholder="Search products, categories..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => searchQuery && setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                 className="pl-12 pr-4 py-3 w-full bg-slate-800/40 border-slate-600/50 text-slate-200 placeholder-slate-400 rounded-xl focus:border-amber-400/60 focus:ring-2 focus:ring-amber-500/20 transition-all duration-300 backdrop-blur-sm"
+                autoComplete="off"
               />
+
+              {/* Search Suggestions Dropdown */}
+              {showSuggestions && searchSuggestions.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="absolute top-full mt-2 w-full bg-slate-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-amber-500/20 z-50 max-h-80 overflow-y-auto"
+                >
+                  <div className="p-3">
+                    <div className="text-xs font-semibold text-amber-400 mb-3 flex items-center">
+                      <TrendingUp className="w-3 h-3 mr-1" />
+                      Suggestions
+                    </div>
+                    {searchSuggestions.map((suggestion, index) => (
+                      <motion.button
+                        key={suggestion.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        className="w-full flex items-center px-3 py-2.5 text-sm text-slate-300 hover:text-amber-400 hover:bg-slate-700/50 rounded-lg transition-all duration-200 group"
+                      >
+                        <div className="flex items-center flex-1">
+                          {suggestion.type === 'category' && (
+                            <Tag className="w-4 h-4 mr-3 text-green-400 group-hover:text-green-300" />
+                          )}
+                          {suggestion.type === 'product' && (
+                            <Package className="w-4 h-4 mr-3 text-blue-400 group-hover:text-blue-300" />
+                          )}
+                          {suggestion.type === 'popular' && (
+                            <TrendingUp className="w-4 h-4 mr-3 text-orange-400 group-hover:text-orange-300" />
+                          )}
+                          <div className="text-left">
+                            <div className="font-medium">{suggestion.title}</div>
+                            {suggestion.category && (
+                              <div className="text-xs text-slate-500">in {suggestion.category}</div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-xs text-slate-500 capitalize ml-2">
+                          {suggestion.type}
+                        </div>
+                      </motion.button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
             </form>
           </div>
 
@@ -280,20 +376,67 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Mobile Search Bar */}
-        <div className="md:hidden pb-3">
+        {/* Mobile Search Bar with Autocomplete */}
+        <div className="md:hidden pb-3 relative">
           <form onSubmit={handleSearch} className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-amber-400" />
             </div>
             <Input
               type="text"
-              placeholder="Search products..."
+              placeholder="Search products, categories..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => searchQuery && setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
               className="pl-12 pr-4 py-3 w-full bg-slate-800/40 border-slate-600/50 text-slate-200 placeholder-slate-400 rounded-xl focus:border-amber-400/60 focus:ring-2 focus:ring-amber-500/20 transition-all duration-300"
+              autoComplete="off"
             />
           </form>
+
+          {/* Mobile Search Suggestions */}
+          {showSuggestions && searchSuggestions.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="absolute top-full mt-2 left-0 right-0 bg-slate-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-amber-500/20 z-50 max-h-60 overflow-y-auto"
+            >
+              <div className="p-3">
+                <div className="text-xs font-semibold text-amber-400 mb-3 flex items-center">
+                  <TrendingUp className="w-3 h-3 mr-1" />
+                  Suggestions
+                </div>
+                {searchSuggestions.slice(0, 5).map((suggestion, index) => (
+                  <motion.button
+                    key={suggestion.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    className="w-full flex items-center px-3 py-2.5 text-sm text-slate-300 hover:text-amber-400 hover:bg-slate-700/50 rounded-lg transition-all duration-200 group"
+                  >
+                    <div className="flex items-center flex-1">
+                      {suggestion.type === 'category' && (
+                        <Tag className="w-4 h-4 mr-3 text-green-400" />
+                      )}
+                      {suggestion.type === 'product' && (
+                        <Package className="w-4 h-4 mr-3 text-blue-400" />
+                      )}
+                      {suggestion.type === 'popular' && (
+                        <TrendingUp className="w-4 h-4 mr-3 text-orange-400" />
+                      )}
+                      <div className="text-left flex-1">
+                        <div className="font-medium truncate">{suggestion.title}</div>
+                        {suggestion.category && (
+                          <div className="text-xs text-slate-500">in {suggestion.category}</div>
+                        )}
+                      </div>
+                    </div>
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
 

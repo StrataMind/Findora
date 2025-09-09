@@ -6,6 +6,7 @@ import { Heart, ShoppingCart, Eye, Star, Zap, Shield, TrendingUp, Share2, Rotate
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { useWishlist } from '@/contexts/wishlist-context'
 
 interface Product {
   id: string
@@ -54,14 +55,32 @@ export function AdvancedProductCard({
   onCompare,
   className 
 }: AdvancedProductCardProps) {
-  const [isWishlisted, setIsWishlisted] = React.useState(false)
+  const { addItem, removeItem, isInWishlist } = useWishlist()
   const [currentImageIndex, setCurrentImageIndex] = React.useState(0)
   const [isHovered, setIsHovered] = React.useState(false)
-
+  
+  const isWishlisted = isInWishlist(product.id)
   const BadgeIcon = product.badge ? badgeConfig[product.badge].icon : null
 
   const handleWishlistClick = () => {
-    setIsWishlisted(!isWishlisted)
+    if (isWishlisted) {
+      removeItem(product.id)
+    } else {
+      addItem({
+        id: `wishlist_${product.id}`,
+        productId: product.id,
+        name: product.name,
+        slug: product.name.toLowerCase().replace(/\s+/g, '-'),
+        price: product.price,
+        compareAtPrice: product.originalPrice,
+        image: product.images[0],
+        inStock: product.inStock,
+        seller: {
+          id: 'seller_1',
+          businessName: product.seller || 'Unknown Seller'
+        }
+      })
+    }
     onWishlist?.(product.id)
   }
 
@@ -110,18 +129,22 @@ export function AdvancedProductCard({
           </div>
         )}
 
-        {/* Quick Actions */}
-        <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
-          <Button
-            size="sm"
-            variant="ghost"
-            className={`w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-lg backdrop-blur-sm transition-all duration-200 ${
-              isWishlisted ? 'text-red-500 hover:text-red-600' : 'text-gray-600 hover:text-red-500'
-            }`}
-            onClick={handleWishlistClick}
-          >
-            <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-current' : ''}`} />
-          </Button>
+        {/* Always Visible Wishlist Button */}
+        <motion.button
+          className={`absolute top-4 right-4 z-20 w-10 h-10 rounded-full shadow-lg backdrop-blur-sm transition-all duration-300 ${
+            isWishlisted 
+              ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-red-500/25' 
+              : 'bg-white/90 hover:bg-white text-gray-600 hover:text-red-500'
+          }`}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={handleWishlistClick}
+        >
+          <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
+        </motion.button>
+
+        {/* Quick Actions (Hover Only) */}
+        <div className="absolute top-4 left-4 z-20 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-2 group-hover:translate-x-0">
           <Button
             size="sm"
             variant="ghost"

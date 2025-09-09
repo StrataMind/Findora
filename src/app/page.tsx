@@ -14,6 +14,7 @@ import { CategoryShowcase } from '@/components/modern/category-showcase'
 import { FeaturesSection } from '@/components/modern/features-section'
 import { TestimonialsSection } from '@/components/modern/testimonials-section'
 import { AdvancedProductCard } from '@/components/modern/advanced-product-card'
+import { ProductQuickView } from '@/components/modern/product-quick-view'
 import Header from '@/components/navigation/header'
 import { 
   Search, 
@@ -64,6 +65,8 @@ export default function Home() {
   const [trendingProducts, setTrendingProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null)
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -136,6 +139,16 @@ export default function Home() {
     </div>
   )
 
+  const handleQuickView = (product: Product) => {
+    setQuickViewProduct(product)
+    setIsQuickViewOpen(true)
+  }
+
+  const closeQuickView = () => {
+    setIsQuickViewOpen(false)
+    setTimeout(() => setQuickViewProduct(null), 300)
+  }
+
   const ProductCard = ({ product }: { product: Product }) => {
     // Transform Product to AdvancedProductCard format
     const transformedProduct = {
@@ -164,7 +177,7 @@ export default function Home() {
         variant="compact"
         onAddToCart={(id) => console.log('Add to cart:', id)}
         onWishlist={(id) => console.log('Add to wishlist:', id)}
-        onQuickView={(id) => console.log('Quick view:', id)}
+        onQuickView={(id) => handleQuickView(product)}
         onShare={(id) => console.log('Share:', id)}
         onCompare={(id) => console.log('Compare:', id)}
       />
@@ -533,6 +546,32 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Quick View Modal */}
+      <ProductQuickView
+        product={quickViewProduct ? {
+          id: quickViewProduct.id,
+          name: quickViewProduct.name,
+          price: quickViewProduct.price,
+          originalPrice: quickViewProduct.compareAtPrice,
+          images: quickViewProduct.images?.map(img => img.url) || ['/api/placeholder/400/400'],
+          rating: quickViewProduct.averageRating || 4.0,
+          reviews: quickViewProduct.totalReviews || 0,
+          category: quickViewProduct.category?.name || 'General',
+          badge: quickViewProduct.compareAtPrice && quickViewProduct.compareAtPrice > quickViewProduct.price ? 'sale' as const : undefined,
+          discount: quickViewProduct.compareAtPrice && quickViewProduct.compareAtPrice > quickViewProduct.price 
+            ? Math.round(((quickViewProduct.compareAtPrice - quickViewProduct.price) / quickViewProduct.compareAtPrice) * 100) 
+            : undefined,
+          seller: quickViewProduct.seller?.businessName || 'Unknown Seller',
+          freeShipping: true,
+          fastDelivery: quickViewProduct.id.length % 2 === 0,
+          inStock: quickViewProduct.stock > 0,
+          stockCount: quickViewProduct.stock,
+          description: `Experience the premium quality of ${quickViewProduct.name}. This carefully selected product offers exceptional value and performance, making it perfect for your needs.`
+        } : null}
+        isOpen={isQuickViewOpen}
+        onClose={closeQuickView}
+      />
     </div>
   )
 }

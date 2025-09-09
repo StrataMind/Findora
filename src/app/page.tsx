@@ -14,6 +14,7 @@ import { CategoryShowcase } from '@/components/modern/category-showcase'
 import { FeaturesSection } from '@/components/modern/features-section'
 import { TestimonialsSection } from '@/components/modern/testimonials-section'
 import { AdvancedProductCard } from '@/components/modern/advanced-product-card'
+import Header from '@/components/navigation/header'
 import { 
   Search, 
   Star, 
@@ -172,6 +173,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-800 relative overflow-hidden">
+      <Header />
       {/* Starry background */}
       <div className="absolute inset-0 overflow-hidden">
         {[...Array(100)].map((_, i) => {

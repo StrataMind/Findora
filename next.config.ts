@@ -18,10 +18,6 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['@prisma/client', 'bcryptjs'],
   // Force all pages to be dynamic to prevent prerender errors
   trailingSlash: false,
-  // Disable static generation for problematic routes
-  async generateStaticParams() {
-    return []
-  },
 };
 
 export default nextConfig;

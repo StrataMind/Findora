@@ -1,91 +1,52 @@
-export const dynamic = 'force-dynamic'
+import './globals.css';
+import Link from 'next/link';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import Providers from "@/components/providers/session-provider";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "sonner";
-import { CartProvider } from "@/contexts/cart-context";
-import { WishlistProvider } from "@/contexts/wishlist-context";
-import CartSidebar from "@/components/cart/cart-sidebar";
-import ErrorBoundary from "@/components/error-boundary";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-  display: 'swap',
-  preload: true,
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-  display: 'swap',
-  preload: false, // Only preload primary font
-});
-
-export const metadata: Metadata = {
-  title: "Findora - E-commerce Platform",
-  description: "Modern e-commerce platform with secure authentication and seamless user experience",
-  keywords: ["e-commerce", "shopping", "secure", "authentication", "next.js"],
-  authors: [{ name: "Findora Team" }],
-  icons: {
-    icon: "/favicon.ico",
-    apple: "/icon-192x192.svg",
-  },
+export const metadata = {
+  title: 'Art & Apparel Store',
+  description: 'Original paintings and custom t-shirts',
 };
 
-export function generateViewport() {
-  return {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-  }
-}
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const session = await getServerSession(authOptions);
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
   return (
-    <html lang="en" data-scroll-behavior="smooth">
-      <head>
-        {/* Google Analytics */}
-        <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-KJF42B5EK8"
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-KJF42B5EK8', {
-                page_title: document.title,
-                page_location: window.location.href,
-              });
-            `,
-          }}
-        />
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <ErrorBoundary>
-          <Providers>
-            <WishlistProvider>
-              <CartProvider>
-                {children}
-                <CartSidebar />
-                <Toaster />
-                <Sonner position="top-right" />
-              </CartProvider>
-            </WishlistProvider>
-          </Providers>
-        </ErrorBoundary>
+    <html lang="en">
+      <body className="font-sans antialiased">
+        <header className="border-b border-neutral-200">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <Link href="/" className="text-2xl font-serif">Art & Apparel</Link>
+            
+            <nav className="hidden md:flex gap-8">
+              <Link href="/products" className="hover:underline">Products</Link>
+              <Link href="/categories" className="hover:underline">Categories</Link>
+            </nav>
+
+            <div className="flex items-center gap-4">
+              <Link href="/cart" className="hover:underline">Cart</Link>
+              {session ? (
+                <>
+                  <Link href="/orders" className="hover:underline">Orders</Link>
+                  {session.user.isAdmin && (
+                    <Link href="/dashboard" className="hover:underline">Dashboard</Link>
+                  )}
+                  <Link href="/profile" className="hover:underline">Profile</Link>
+                </>
+              ) : (
+                <Link href="/auth/signin" className="hover:underline">Sign In</Link>
+              )}
+            </div>
+          </div>
+        </header>
+
+        <main>{children}</main>
+
+        <footer className="border-t border-neutral-200 mt-20">
+          <div className="container mx-auto px-4 py-8 text-center text-neutral-600">
+            <p>&copy; {new Date().getFullYear()} Art & Apparel. All rights reserved.</p>
+          </div>
+        </footer>
       </body>
     </html>
   );

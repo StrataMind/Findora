@@ -19,18 +19,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <Header />
           <main>{children}</main>
-          <footer className="border-t border-neutral-300 mt-20 bg-neutral-50">
+          <footer className="border-t border-neutral-300 mt-20" style={{ backgroundColor: '#f5f2eb' }}>
             <div className="container mx-auto px-4 py-12">
               <div className="grid md:grid-cols-3 gap-8 mb-8">
                 <div>
                   <h3 className="text-lg font-medium mb-3">About</h3>
-                  <p className="text-sm text-neutral-600 leading-relaxed">
+                  <p className="text-sm text-neutral-700 leading-relaxed">
                     Original artwork and designs crafted with passion and attention to detail.
                   </p>
                 </div>
                 <div>
                   <h3 className="text-lg font-medium mb-3">Contact</h3>
-                  <p className="text-sm text-neutral-600">
+                  <p className="text-sm text-neutral-700">
                     Email: artist@example.com<br />
                     Instagram: @artistname
                   </p>
@@ -41,15 +41,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     <input
                       type="email"
                       placeholder="Your email"
-                      className="flex-1 px-3 py-2 text-sm border border-neutral-300 focus:border-neutral-800 focus:outline-none"
+                      className="flex-1 px-3 py-2 text-sm bg-white border border-neutral-300 focus:border-neutral-800 focus:outline-none"
                     />
-                    <button className="bg-neutral-800 text-white px-4 py-2 text-sm hover:bg-black">
+                    <button className="text-white px-4 py-2 text-sm hover:opacity-90" style={{ backgroundColor: '#2d2d2d' }}>
                       Subscribe
                     </button>
                   </div>
                 </div>
               </div>
-              <div className="text-center text-sm text-neutral-500 pt-8 border-t border-neutral-200">
+              <div className="text-center text-sm text-neutral-600 pt-8 border-t border-neutral-300">
                 <p>&copy; {new Date().getFullYear()} Art & Apparel. All rights reserved.</p>
               </div>
             </div>

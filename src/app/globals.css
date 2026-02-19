@@ -2,7 +2,8 @@
 
 @layer base {
   body {
-    @apply text-neutral-800 bg-white;
+    @apply text-neutral-800;
+    background-color: #faf8f3;
     font-family: 'Georgia', 'Times New Roman', serif;
   }
   
@@ -10,6 +11,7 @@
     font-family: 'Playfair Display', 'Georgia', serif;
     font-weight: 400;
     letter-spacing: 0.02em;
+    color: #2d2d2d;
   }
   
   p, a, button, input {

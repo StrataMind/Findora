@@ -1,275 +1,52 @@
-"use client"
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic'
-
-import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
-import BackButton from "@/components/ui/back-button"
-
-const profileSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  currentPassword: z.string().optional(),
-  newPassword: z.string().optional(),
-  confirmPassword: z.string().optional(),
-}).refine((data) => {
-  if (data.newPassword && data.newPassword !== data.confirmPassword) {
-    return false
-  }
-  if (data.newPassword && !data.currentPassword) {
-    return false
-  }
-  if (data.newPassword && data.newPassword.length < 6) {
-    return false
-  }
-  return true
-}, {
-  message: "Password validation failed",
-  path: ["confirmPassword"],
-})
-
-type ProfileFormData = z.infer<typeof profileSchema>
-
-export default function ProfilePage() {
-  const { data: session, update } = useSession()
-  const router = useRouter()
-  const { toast } = useToast()
-  const [isLoading, setIsLoading] = useState(false)
-  const [userStatus, setUserStatus] = useState<any>(null)
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-  } = useForm<ProfileFormData>({
-    resolver: zodResolver(profileSchema),
-    defaultValues: {
-      name: session?.user?.name || "",
-    },
-  })
-
-  const newPassword = watch("newPassword")
-
-  useEffect(() => {
-    if (session?.user) {
-      loadUserStatus()
-    }
-  }, [session])
-
-  const loadUserStatus = async () => {
-    try {
-      const response = await fetch('/api/user/status')
-      if (response.ok) {
-        const data = await response.json()
-        setUserStatus(data.user)
-      }
-    } catch (error) {
-      console.error('Error loading user status:', error)
-    }
-  }
-
-  const onSubmit = async (data: ProfileFormData) => {
-    setIsLoading(true)
-    try {
-      const response = await fetch("/api/profile/update", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: data.name,
-          currentPassword: data.currentPassword,
-          newPassword: data.newPassword,
-        }),
-      })
-
-      const result = await response.json()
-
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to update profile")
-      }
-
-      // Update the session with new name
-      await update({
-        ...session,
-        user: {
-          ...session?.user,
-          name: data.name,
-        },
-      })
-
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully.",
-      })
-
-      // Clear password fields
-      document.getElementById("profileForm")?.reset()
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update profile",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
+export default async function ProfilePage() {
+  const session = await getServerSession(authOptions);
+  
   if (!session) {
-    router.push("/auth/signin")
-    return null
+    redirect('/auth/signin');
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-6">
-          <BackButton href="/" label="Back to Home" />
-        </div>
-        
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h1 className="text-2xl font-bold text-gray-900">Profile Settings</h1>
-            <p className="text-sm text-gray-600 mt-1">
-              Update your personal information and password
-            </p>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-4xl font-serif mb-8">Profile</h1>
+
+      <div className="max-w-2xl">
+        <div className="border border-neutral-200 p-6 mb-6">
+          <h2 className="text-2xl font-medium mb-4">Account Information</h2>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm text-neutral-600 mb-1">Name</label>
+              <p className="font-medium">{session.user.name || 'Not set'}</p>
+            </div>
+            
+            <div>
+              <label className="block text-sm text-neutral-600 mb-1">Email</label>
+              <p className="font-medium">{session.user.email}</p>
+            </div>
           </div>
+        </div>
 
-          <form id="profileForm" onSubmit={handleSubmit(onSubmit)} className="px-6 py-6 space-y-6">
-            {/* Personal Information */}
-            <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Personal Information</h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={session.user?.email || ""}
-                    disabled
-                    className="bg-gray-50"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Email cannot be changed
-                  </p>
-                </div>
-
-                <div>
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    {...register("name")}
-                    className={errors.name ? "border-red-500" : ""}
-                  />
-                  {errors.name && (
-                    <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label>Role</Label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Input
-                      type="text"
-                      value={userStatus?.role || session?.user?.role || "BUYER"}
-                      disabled
-                      className="bg-gray-50"
-                    />
-                    {userStatus?.isSuperuser && (
-                      <div className="flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
-                        👑 {userStatus.superuserLevel}
-                      </div>
-                    )}
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {userStatus?.isSuperuser ? "You have superuser privileges" : "Your account role"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Password Change */}
-            <div>
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Change Password</h2>
-              <p className="text-sm text-gray-600 mb-4">
-                Leave password fields empty if you don't want to change your password
-              </p>
-              
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="currentPassword">Current Password</Label>
-                  <Input
-                    id="currentPassword"
-                    type="password"
-                    {...register("currentPassword")}
-                    className={errors.currentPassword ? "border-red-500" : ""}
-                  />
-                  {errors.currentPassword && (
-                    <p className="text-red-500 text-xs mt-1">{errors.currentPassword.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="newPassword">New Password</Label>
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    {...register("newPassword")}
-                    className={errors.newPassword ? "border-red-500" : ""}
-                  />
-                  {newPassword && newPassword.length < 6 && (
-                    <p className="text-red-500 text-xs mt-1">
-                      Password must be at least 6 characters
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    {...register("confirmPassword")}
-                    className={errors.confirmPassword ? "border-red-500" : ""}
-                  />
-                  {errors.confirmPassword && (
-                    <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex justify-between pt-6 border-t border-gray-200">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.back()}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={isLoading}
-              >
-                {isLoading ? "Updating..." : "Update Profile"}
-              </Button>
-            </div>
+        <div className="border border-neutral-200 p-6">
+          <h2 className="text-2xl font-medium mb-4">Actions</h2>
+          
+          <form action={async () => {
+            'use server';
+            await signOut({ redirectTo: '/' });
+          }}>
+            <button
+              type="submit"
+              className="bg-red-600 text-white px-6 py-2 hover:bg-red-700 transition"
+            >
+              Sign Out
+            </button>
           </form>
         </div>
       </div>
     </div>
-  )
+  );
 }

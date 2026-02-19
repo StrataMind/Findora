@@ -18,17 +18,22 @@ export default async function ProductsPage({
         category: { slug: searchParams.category },
       }),
     },
-    include: { images: true, category: true },
+    include: { 
+      images: { take: 1, orderBy: { position: 'asc' } },
+      category: { select: { name: true } }
+    },
     orderBy: { createdAt: 'desc' },
+    take: 50,
   });
 
-  const categories = await prisma.category.findMany();
+  const categories = await prisma.category.findMany({
+    select: { id: true, name: true, slug: true }
+  });
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-serif mb-8">Products</h1>
 
-      {/* Filters */}
       <div className="mb-8 flex gap-4 flex-wrap">
         <Link
           href="/products"
@@ -47,7 +52,6 @@ export default async function ProductsPage({
         ))}
       </div>
 
-      {/* Products Grid */}
       {products.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-xl text-neutral-600">No products found</p>
@@ -55,13 +59,14 @@ export default async function ProductsPage({
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {products.map((product) => (
-            <Link key={product.id} href={`/products/${product.slug}`} className="group">
-              <div className="bg-white border border-neutral-200 overflow-hidden hover:shadow-lg transition">
+            <Link key={product.id} href={`/products/${product.slug}`}>
+              <div className="bg-white border border-neutral-200 hover:shadow-lg transition">
                 {product.images[0] && (
                   <img
                     src={product.images[0].url}
                     alt={product.name}
-                    className="w-full h-64 object-cover group-hover:opacity-90 transition"
+                    className="w-full h-64 object-cover"
+                    loading="lazy"
                   />
                 )}
                 <div className="p-4">

@@ -8,7 +8,7 @@ Welcome to my art gallery! Here you'll find original paintings available for pur
 
 ## Visit
 
-🌐 [View Gallery](https://findora-tau.vercel.app)
+🌐 [View Gallery](https://art-and-apparel.vercel.app)
 
 ## Features
 

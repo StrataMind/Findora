@@ -25,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main>{children}</main>
           <footer className="border-t border-neutral-300 mt-20" style={{ backgroundColor: '#f5f2eb' }}>
             <div className="container mx-auto px-4 py-12">
-              <div className="grid md:grid-cols-3 gap-8 mb-8">
+              <div className="grid md:grid-cols-2 gap-8 mb-8">
                 <div>
                   <h3 className="text-lg font-medium mb-3">About</h3>
                   <p className="text-sm text-neutral-700 leading-relaxed">
@@ -38,19 +38,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     Email: qnovalabs@gmail.com<br />
                     Instagram: @suraj_singh_nitk
                   </p>
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium mb-3">Newsletter</h3>
-                  <div className="flex gap-2">
-                    <input
-                      type="email"
-                      placeholder="Your email"
-                      className="flex-1 px-3 py-2 text-sm bg-white border border-neutral-300 focus:border-neutral-800 focus:outline-none"
-                    />
-                    <button className="text-white px-4 py-2 text-sm hover:opacity-90" style={{ backgroundColor: '#2d2d2d' }}>
-                      Subscribe
-                    </button>
-                  </div>
                 </div>
               </div>
               <div className="text-center text-sm text-neutral-600 pt-8 border-t border-neutral-300">

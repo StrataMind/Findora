@@ -32,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     Original artwork and designs crafted with passion and attention to detail.
                   </p>
                 </div>
-                <div>
+                <div className="md:text-right">
                   <h3 className="text-lg font-medium mb-3">Contact</h3>
                   <p className="text-sm text-neutral-700">
                     Email: qnovalabs@gmail.com<br />

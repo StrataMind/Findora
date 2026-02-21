@@ -35,8 +35,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <div>
                   <h3 className="text-lg font-medium mb-3">Contact</h3>
                   <p className="text-sm text-neutral-700">
-                    Email: artist@example.com<br />
-                    Instagram: @artistname
+                    Email: qnovalabs@gmail.com<br />
+                    Instagram: @suraj_singh_nitk
                   </p>
                 </div>
                 <div>

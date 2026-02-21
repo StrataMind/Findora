@@ -6,6 +6,9 @@ import Link from 'next/link';
 export const metadata = {
   title: 'Art & Apparel - Original Paintings & Designs',
   description: 'Original paintings and custom designs by [Artist Name]',
+  other: {
+    'p:domain_verify': '615118958ead0edff5e2168fe92e72ef',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

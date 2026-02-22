@@ -96,7 +96,7 @@ export default function ArtPage() {
         ))}
       </div>
 
-      <div className="mt-24 bg-neutral-50 p-12 text-center max-w-3xl mx-auto border border-neutral-300">
+      <div className="mt-16 md:mt-24 bg-neutral-50 p-6 md:p-12 text-center max-w-3xl mx-auto border border-neutral-300">
         <h2 className="text-3xl mb-4">Commission Work</h2>
         <div className="w-16 h-px bg-neutral-400 mx-auto mb-6"></div>
         <p className="text-neutral-600 mb-8 leading-relaxed">

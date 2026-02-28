@@ -100,6 +100,20 @@ export default function HomePage() {
           <p className="text-sm text-neutral-600 uppercase tracking-wide">
             Secure payment powered by Stripe
           </p>
+
+          <div className="mt-8 pt-8 border-t border-neutral-300">
+            <p className="text-sm text-neutral-600 mb-4">Or support via</p>
+            <a
+              href="https://buymeacoffee.com/silent_birds"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-full font-semibold text-sm hover:opacity-90 transition"
+              style={{ backgroundColor: '#FFDD00', color: '#000000' }}
+            >
+              <span className="text-xl">☕</span>
+              Buy Me a Coffee
+            </a>
+          </div>
         </div>
       </section>
 
